@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import './App.css';
-import AddProductDialog from './components/add-product-dialog.component';
 import type { Product } from './types';
+import AddProductDialog from './components/add-product-dialog.component';
 
 export default function App() {
   const categories = [
