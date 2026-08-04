@@ -64,13 +64,17 @@ export default function App() {
       <div>
         {products?.length > 0 && (
           <ul>
-            {products?.map(({ id, name, price, link }) => (
+            {products?.map(({ id, name, price, link, store, category }) => (
               <li key={id}>
+                <p>
+                  {store} · {category}
+                </p>
                 <p>{name}</p>
-                <p>{price ?? 'preço a conferir'}</p>
+                <p>{price ? 'R$ ' + price + ',00' : 'preço a conferir'}</p>
                 <div>
-                  <a href={link} />
-                  <div></div>
+                  <a href={link} target="blank" className="text-underline">
+                    ver na loja
+                  </a>
                 </div>
               </li>
             ))}
