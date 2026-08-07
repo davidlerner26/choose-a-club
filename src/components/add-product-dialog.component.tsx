@@ -8,10 +8,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
+import { Field, FieldGroup, FieldLabel } from './ui/field';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Field, FieldGroup, FieldLabel } from './ui/field';
 
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { Button } from './ui/button';
 import {
   Select,
   SelectContent,
@@ -20,8 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { useForm, type SubmitHandler } from 'react-hook-form';
-import { Button } from './ui/button';
 
 type IFormInput = {
   link: string;
@@ -29,6 +29,7 @@ type IFormInput = {
   price: number;
   category: string;
   store: string;
+  url: string;
 };
 
 export default function AddProductDialog({ categories, setProducts }) {
@@ -104,6 +105,19 @@ export default function AddProductDialog({ categories, setProducts }) {
               <Field>
                 <Label htmlFor="store">Loja</Label>
                 <Input id="store" name="store" {...register('store')} />
+              </Field>
+              {/* <Field>
+                <FieldLabel htmlFor="picture">Foto da peça</FieldLabel>
+                <Input id="picture" type="file" />
+              </Field> */}
+              <Field>
+                <Label htmlFor="url">URL da imagem</Label>
+                <Input
+                  id="url"
+                  name="url"
+                  placeholder="Cole aqui a URL da imagem"
+                  {...register('url')}
+                />
               </Field>
             </FieldGroup>
             <DialogFooter>

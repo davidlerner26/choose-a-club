@@ -142,7 +142,7 @@ export default function App() {
                     <p>
                       {store} · {category}
                     </p>
-                    <p>{name}</p>
+                    <p className="font-bold">{name}</p>
                     <p className="text-red-700">
                       {price ? 'R$ ' + price + ',00' : 'preço a conferir'}
                     </p>
