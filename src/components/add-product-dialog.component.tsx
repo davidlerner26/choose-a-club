@@ -34,6 +34,8 @@ type IFormInput = {
 export default function AddProductDialog({ categories, setProducts }) {
   const { register, handleSubmit } = useForm<IFormInput>();
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
+    console.log(data);
+
     setProducts((products) => [
       ...products,
       { ...data, id: crypto.randomUUID(), price: Number(data.price) },
@@ -50,17 +52,17 @@ export default function AddProductDialog({ categories, setProducts }) {
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
               <DialogTitle>Nova peça</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="mb-4">
                 Cole o link e aguarde — o app busca nome, preço e foto sozinho.
               </DialogDescription>
             </DialogHeader>
-            <FieldGroup>
+            <FieldGroup className="mb-8">
               <Field>
                 <Label htmlFor="link">Link da loja</Label>
                 <Input
                   id="link"
                   name="link"
-                  placeholder="https://loja.com.br/vestido"
+                  placeholder="https://loja.com.br/vestido..."
                   {...register('link')}
                 />
               </Field>
@@ -69,7 +71,7 @@ export default function AddProductDialog({ categories, setProducts }) {
                 <Input
                   id="name"
                   name="name"
-                  placeholder="https://loja.com.br/vestido"
+                  placeholder="Vestido midi de linho"
                   {...register('name')}
                 />
               </Field>
@@ -78,7 +80,7 @@ export default function AddProductDialog({ categories, setProducts }) {
                 <Input
                   id="price"
                   name="price"
-                  placeholder="https://loja.com.br/vestido"
+                  placeholder="189,90"
                   {...register('price')}
                 />
               </Field>
@@ -86,7 +88,7 @@ export default function AddProductDialog({ categories, setProducts }) {
                 <FieldLabel>Categoria</FieldLabel>
                 <Select items={categories} {...register('category')}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Escolhe uma categoria" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
@@ -101,12 +103,7 @@ export default function AddProductDialog({ categories, setProducts }) {
               </Field>
               <Field>
                 <Label htmlFor="store">Loja</Label>
-                <Input
-                  id="store"
-                  name="store"
-                  placeholder="https://loja.com.br/vestido"
-                  {...register('store')}
-                />
+                <Input id="store" name="store" {...register('store')} />
               </Field>
             </FieldGroup>
             <DialogFooter>

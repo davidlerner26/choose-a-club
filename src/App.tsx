@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import type { Product } from './types';
 import AddProductDialog from './components/add-product-dialog.component';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { IconRefresh } from '@tabler/icons-react';
+import {
+  IconCheck,
+  IconEdit,
+  IconExternalLink,
+  IconRefresh,
+  IconX,
+} from '@tabler/icons-react';
 import { Input } from './components/ui/input';
+import { Card, CardContent, CardFooter } from './components/ui/card';
 
 export default function App() {
   const categories = [
@@ -42,18 +49,28 @@ export default function App() {
     document.getElementById('link')?.focus();
   };
 
+  const buyProduct = (id: string) => {
+    removeProduct(id);
+  };
+
+  const editProduct = (id: string) => {};
+
+  const removeProduct = (id: string) => {
+    setProducts((products) => products.filter((product) => product.id !== id));
+  };
+
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
   return (
-    <>
+    <main className="m-auto max-w-4xl mt-8">
       <p>wishlist pessoal</p>
       <div className="flex items-center justify-between mb-5">
-        <h1>Guarda-Roupa Futuro</h1>
+        <h1 className="text-4xl">Guarda-Roupa Futuro</h1>
         <div className="flex items-center gap-4">
           <div>
             <p>{products?.length} peças desejadas</p>
             <p className="text-right text-red-700">
-              R${products?.reduce((acc, product) => acc + product.price, 0)},00
+              R${products?.reduce((acc, product) => acc + product.price, 0)}
             </p>
           </div>
           <div className="flex gap-3">
@@ -106,26 +123,68 @@ export default function App() {
           name="link"
           placeholder="Cole o link a peça aqui - ela entra sozinha ✨"
         />
-        <Button size="lg" className="bg-red-700 hover:bg-red-800">
+        <Button
+          size="lg"
+          className="bg-red-700 hover:bg-red-800"
+          onClick={() => focusInput()}
+        >
           Adicionar
         </Button>
       </div>
 
       <div>
         {products?.length > 0 ? (
-          <ul>
+          <ul className="grid grid-cols-3 gap-4">
             {products?.map(({ id, name, price, link, store, category }) => (
               <li key={id}>
-                <p>
-                  {store} · {category}
-                </p>
-                <p>{name}</p>
-                <p>{price ? 'R$ ' + price + ',00' : 'preço a conferir'}</p>
-                <div>
-                  <a href={link} target="blank" className="text-underline">
-                    ver na loja
-                  </a>
-                </div>
+                <Card>
+                  <CardContent>
+                    <p>
+                      {store} · {category}
+                    </p>
+                    <p>{name}</p>
+                    <p className="text-red-700">
+                      {price ? 'R$ ' + price + ',00' : 'preço a conferir'}
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <div className="flex items-center justify-between w-full">
+                      <div>
+                        <a
+                          href={link}
+                          target="blank"
+                          className={buttonVariants({ variant: 'link' })}
+                        >
+                          ver na loja
+                          <IconExternalLink stroke={2} />
+                        </a>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => buyProduct(id)}
+                        >
+                          <IconCheck stroke={2} />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => editProduct(id)}
+                        >
+                          <IconEdit stroke={2} />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeProduct(id)}
+                        >
+                          <IconX stroke={2} />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardFooter>
+                </Card>
               </li>
             ))}
           </ul>
@@ -148,6 +207,6 @@ export default function App() {
           </div>
         )}
       </div>
-    </>
+    </main>
   );
 }
