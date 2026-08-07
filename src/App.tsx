@@ -38,6 +38,10 @@ export default function App() {
     setOptionSelected(option);
   };
 
+  const focusInput = () => {
+    document.getElementById('link')?.focus();
+  };
+
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
   return (
@@ -133,7 +137,11 @@ export default function App() {
                 Viu uma peça que amou? É só colar o link da loja — o resto
                 (nome, preço, foto) aparece sozinho.
               </p>
-              <Button size="lg" className="bg-red-700 hover:bg-red-800">
+              <Button
+                size="lg"
+                className="bg-red-700 hover:bg-red-800"
+                onClick={() => focusInput()}
+              >
                 Colar o primeiro link
               </Button>
             </div>
