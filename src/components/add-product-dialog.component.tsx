@@ -12,7 +12,7 @@ import { Field, FieldGroup, FieldLabel } from './ui/field';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { Controller, useForm, type SubmitHandler } from 'react-hook-form';
 import { Button } from './ui/button';
 import {
   Select,
@@ -22,19 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-
-type IFormInput = {
-  link: string;
-  name: string;
-  price: number;
-  category: string;
-  store: string;
-  url: string;
-};
+import type { Product } from '@/types';
 
 export default function AddProductDialog({ categories, setProducts }) {
-  const { register, handleSubmit } = useForm<IFormInput>();
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+  const { register, handleSubmit, control } = useForm<Product>();
+  const onSubmit: SubmitHandler<Product> = (data) => {
     console.log(data);
 
     setProducts((products) => [
@@ -54,7 +46,7 @@ export default function AddProductDialog({ categories, setProducts }) {
             <DialogHeader>
               <DialogTitle>Nova peça</DialogTitle>
               <DialogDescription className="mb-4">
-                Cole o link e aguarde — o app busca nome, preço e foto sozinho.
+                Cole o link e aguarde: o app busca nome, preço e foto sozinho.
               </DialogDescription>
             </DialogHeader>
             <FieldGroup className="mb-8">
@@ -87,20 +79,30 @@ export default function AddProductDialog({ categories, setProducts }) {
               </Field>
               <Field>
                 <FieldLabel>Categoria</FieldLabel>
-                <Select items={categories} {...register('category')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Escolhe uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {categories.map((item) => (
-                        <SelectItem key={item} value={item}>
-                          {item}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      items={categories}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolhe uma categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {categories.map((item) => (
+                            <SelectItem key={item} value={item}>
+                              {item}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </Field>
               <Field>
                 <Label htmlFor="store">Loja</Label>

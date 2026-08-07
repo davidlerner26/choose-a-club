@@ -5,4 +5,6 @@ export type Product = {
   link: string;
   category: string;
   store: string;
+  url: string;
+  currency: string;
 };
