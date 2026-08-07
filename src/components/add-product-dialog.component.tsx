@@ -44,7 +44,7 @@ export default function AddProductDialog({ categories, setProducts }) {
     <Dialog>
       <form>
         <DialogTrigger
-          render={<Button variant="outline">+ Colar link</Button>}
+          render={<Button variant="outline">Adicionar manualmente</Button>}
         />
         <DialogContent className="sm:max-w-sm">
           <form onSubmit={handleSubmit(onSubmit)}>

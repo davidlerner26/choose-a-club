@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import type { Product } from './types';
 import AddProductDialog from './components/add-product-dialog.component';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { IconRefresh } from '@tabler/icons-react';
 
 export default function App() {
   const categories = [
@@ -15,29 +18,44 @@ export default function App() {
     'Acessórios',
     'Outros',
   ];
+  const options = [
+    { value: 'Desejando', selected: false },
+    { value: 'Já comprei', selected: false },
+  ];
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [optionSelected, setOptionSelected] = useState<string>(
+    options[0].value,
+  );
 
   const selectCategory = (category: string) => {
     if (category === selectedCategory) return;
     setSelectedCategory(category);
   };
 
+  const selectOption = (option: string) => {
+    setOptionSelected(option);
+  };
+
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
   return (
     <>
-      <h3>wishlist pessoal</h3>
-      <div className="flex items-center justify-between">
+      <p>wishlist pessoal</p>
+      <div className="flex items-center justify-between mb-5">
         <h1>Guarda-Roupa Futuro</h1>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-4">
           <div>
             <p>{products?.length} peças desejadas</p>
-            <p>
+            <p className="text-right">
               R${products?.reduce((acc, product) => acc + product.price, 0)},00
             </p>
           </div>
-          <div>
+          <div className="flex gap-3">
+            <Button variant="outline">
+              <IconRefresh data-icon="inline-start" />
+              Atualizar
+            </Button>
             <AddProductDialog
               categories={categories}
               setProducts={setProducts}
@@ -46,18 +64,31 @@ export default function App() {
         </div>
       </div>
 
-      <div>
-        <ul className="flex gap-2">
+      <div className="flex gap-4 items-center">
+        <div className="flex gap-2 pr-4 border-r">
           {categories.map((category) => (
-            <li
+            <Badge
+              variant={selectedCategory === category ? 'default' : 'outline'}
               key={category}
               onClick={() => selectCategory(category)}
-              className={`rounded-md bg-gray-950/5 px-2.5 py-1.5 text-sm font-semibold text-gray-900 ${selectedCategory === category ? 'bg-red-500 text-white' : ''}`}
             >
               {category}
-            </li>
+            </Badge>
           ))}
-        </ul>
+        </div>
+        <div className="flex">
+          {options.map((option) => (
+            <Button
+              variant="link"
+              size="xs"
+              onClick={() => selectOption(option.value)}
+              key={option.value}
+              className={option.value === optionSelected ? 'underline' : ''}
+            >
+              {option.value}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <div>
