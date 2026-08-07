@@ -4,6 +4,7 @@ import AddProductDialog from './components/add-product-dialog.component';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { IconRefresh } from '@tabler/icons-react';
+import { Input } from './components/ui/input';
 
 export default function App() {
   const categories = [
@@ -47,7 +48,7 @@ export default function App() {
         <div className="flex items-center gap-4">
           <div>
             <p>{products?.length} peças desejadas</p>
-            <p className="text-right">
+            <p className="text-right text-red-700">
               R${products?.reduce((acc, product) => acc + product.price, 0)},00
             </p>
           </div>
@@ -83,7 +84,9 @@ export default function App() {
               size="xs"
               onClick={() => selectOption(option.value)}
               key={option.value}
-              className={option.value === optionSelected ? 'underline' : ''}
+              className={
+                option.value === optionSelected ? 'underline text-red-700' : ''
+              }
             >
               {option.value}
             </Button>
@@ -91,8 +94,21 @@ export default function App() {
         </div>
       </div>
 
+      <hr className="mt-10 mb-10" />
+
+      <div className="flex gap-3 items-center mb-6">
+        <Input
+          id="link"
+          name="link"
+          placeholder="Cole o link a peça aqui - ela entra sozinha ✨"
+        />
+        <Button size="lg" className="bg-red-700 hover:bg-red-800">
+          Adicionar
+        </Button>
+      </div>
+
       <div>
-        {products?.length > 0 && (
+        {products?.length > 0 ? (
           <ul>
             {products?.map(({ id, name, price, link, store, category }) => (
               <li key={id}>
@@ -109,6 +125,19 @@ export default function App() {
               </li>
             ))}
           </ul>
+        ) : (
+          <div className="flex outline-2 outline-dashed w-full h-100 items-center text-center justify-center rounded-md">
+            <div>
+              <p>A arara está vazia</p>
+              <p className="mt-2 mb-2 max-w-md">
+                Viu uma peça que amou? É só colar o link da loja — o resto
+                (nome, preço, foto) aparece sozinho.
+              </p>
+              <Button size="lg" className="bg-red-700 hover:bg-red-800">
+                Colar o primeiro link
+              </Button>
+            </div>
+          </div>
         )}
       </div>
     </>
