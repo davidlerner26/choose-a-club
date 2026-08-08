@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
-import { Field, FieldGroup, FieldLabel } from './ui/field';
+import { Field, FieldError, FieldGroup, FieldLabel } from './ui/field';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 
@@ -25,10 +25,13 @@ import {
 import type { Product } from '@/types';
 
 export default function AddProductDialog({ categories, setProducts }) {
-  const { register, handleSubmit, control } = useForm<Product>();
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<Product>();
   const onSubmit: SubmitHandler<Product> = (data) => {
-    console.log(data);
-
     setProducts((products) => [
       ...products,
       { ...data, id: crypto.randomUUID(), price: Number(data.price) },
@@ -56,8 +59,11 @@ export default function AddProductDialog({ categories, setProducts }) {
                   id="link"
                   name="link"
                   placeholder="https://loja.com.br/vestido..."
-                  {...register('link')}
+                  {...register('link', {
+                    required: 'Link da loja é obrigatório',
+                  })}
                 />
+                <FieldError>{errors.link?.message}</FieldError>
               </Field>
               <Field>
                 <Label htmlFor="name">Nome da peça</Label>
@@ -65,8 +71,11 @@ export default function AddProductDialog({ categories, setProducts }) {
                   id="name"
                   name="name"
                   placeholder="Vestido midi de linho"
-                  {...register('name')}
+                  {...register('name', {
+                    required: 'Link da loja é obrigatório',
+                  })}
                 />
+                <FieldError>{errors.name?.message}</FieldError>
               </Field>
               <Field>
                 <Label htmlFor="price">Preço (R$)</Label>
@@ -74,14 +83,16 @@ export default function AddProductDialog({ categories, setProducts }) {
                   id="price"
                   name="price"
                   placeholder="189,90"
-                  {...register('price')}
+                  {...register('price', { required: 'Preço é obrigatório' })}
                 />
+                <FieldError>{errors.price?.message}</FieldError>
               </Field>
               <Field>
                 <FieldLabel>Categoria</FieldLabel>
                 <Controller
                   name="category"
                   control={control}
+                  rules={{ required: 'Categoria é obrigatória' }}
                   render={({ field }) => (
                     <Select
                       items={categories}
@@ -103,10 +114,18 @@ export default function AddProductDialog({ categories, setProducts }) {
                     </Select>
                   )}
                 />
+                <FieldError>{errors?.category?.message}</FieldError>
               </Field>
               <Field>
                 <Label htmlFor="store">Loja</Label>
-                <Input id="store" name="store" {...register('store')} />
+                <Input
+                  id="store"
+                  name="store"
+                  {...register('store', {
+                    required: 'Nome da loja é obrigatório',
+                  })}
+                />
+                <FieldError>{errors.store?.message}</FieldError>
               </Field>
               {/* <Field>
                 <FieldLabel htmlFor="picture">Foto da peça</FieldLabel>
@@ -118,8 +137,11 @@ export default function AddProductDialog({ categories, setProducts }) {
                   id="url"
                   name="url"
                   placeholder="Cole aqui a URL da imagem"
-                  {...register('url')}
+                  {...register('url', {
+                    required: 'URL da imagem é obrigatório',
+                  })}
                 />
+                <FieldError>{errors.url?.message}</FieldError>
               </Field>
             </FieldGroup>
             <DialogFooter>
