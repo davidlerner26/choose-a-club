@@ -23,26 +23,56 @@ import {
   SelectValue,
 } from './ui/select';
 import type { Product } from '@/types';
+import { IconPlus } from '@tabler/icons-react';
+import { useEffect } from 'react';
 
-export default function AddProductDialog({ categories, setProducts }) {
+export default function AddProductDialog({
+  categories,
+  setProducts,
+  open,
+  setOpen,
+}) {
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
+    reset,
   } = useForm<Product>();
   const onSubmit: SubmitHandler<Product> = (data) => {
     setProducts((products) => [
       ...products,
-      { ...data, id: crypto.randomUUID(), price: Number(data.price) },
+      {
+        ...data,
+        id: crypto.randomUUID(),
+        price: Number(data.price),
+        currency: 'BRL',
+      },
     ]);
+    resetFields(false);
+  };
+
+  useEffect(() => {
+    reset();
+  }, [reset]);
+
+  const resetFields = (open: boolean) => {
+    setOpen(open);
+    if (!open) {
+      reset();
+    }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={resetFields}>
       <form>
         <DialogTrigger
-          render={<Button variant="outline">Adicionar manualmente</Button>}
+          render={
+            <Button size="lg" className="bg-red-700 hover:bg-red-800">
+              <IconPlus></IconPlus>
+              Adicionar produto
+            </Button>
+          }
         />
         <DialogContent className="sm:max-w-sm">
           <form onSubmit={handleSubmit(onSubmit)}>
