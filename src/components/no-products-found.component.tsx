@@ -1,10 +1,6 @@
 import { Button } from './ui/button';
 
 export default function NoProductsFound({ setOpen }) {
-  const openAddProductDialog = () => {
-    setOpen(true);
-  };
-
   return (
     <>
       <div className="flex outline-2 outline-dashed w-full h-100 items-center text-center justify-center rounded-md">
@@ -17,7 +13,7 @@ export default function NoProductsFound({ setOpen }) {
           <Button
             size="lg"
             className="bg-red-700 hover:bg-red-800"
-            onClick={() => openAddProductDialog()}
+            onClick={() => setOpen(true)}
           >
             Colar o primeiro link
           </Button>

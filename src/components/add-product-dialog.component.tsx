@@ -24,14 +24,9 @@ import {
 } from './ui/select';
 import type { Product } from '@/types';
 import { IconPlus } from '@tabler/icons-react';
-import { useEffect } from 'react';
+import { createProduct } from '@/firebase/firebase';
 
-export default function AddProductDialog({
-  categories,
-  setProducts,
-  open,
-  setOpen,
-}) {
+export default function AddProductDialog({ categories, open, setOpen }) {
   const {
     register,
     handleSubmit,
@@ -40,21 +35,23 @@ export default function AddProductDialog({
     reset,
   } = useForm<Product>();
   const onSubmit: SubmitHandler<Product> = (data) => {
-    setProducts((products) => [
-      ...products,
-      {
-        ...data,
-        id: crypto.randomUUID(),
-        price: Number(data.price),
-        currency: 'BRL',
-      },
-    ]);
+    // setProducts((products) => [
+    //   ...products,
+    //   {
+    //     ...data,
+    //     id: crypto.randomUUID(),
+    //     price: Number(data.price),
+    //     currency: 'BRL',
+    //   },
+    // ]);
+    const product: Product = {
+      ...data,
+      price: Number(data.price),
+      currency: 'BRL',
+    };
+    createProduct(product);
     resetFields(false);
   };
-
-  useEffect(() => {
-    reset();
-  }, [reset]);
 
   const resetFields = (open: boolean) => {
     setOpen(open);

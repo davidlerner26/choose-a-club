@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Product } from './types';
 import AddProductDialog from './components/add-product-dialog.component';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardFooter } from './components/ui/card';
 import './App.css';
 import NoProductsFound from './components/no-products-found.component';
+import { deleteProduct, getAllProducts } from './firebase/firebase';
 
 export default function App() {
   const [open, setOpen] = useState<boolean>(false);
@@ -38,6 +39,15 @@ export default function App() {
   ];
 
   const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      const response = await getAllProducts();
+      setProducts(response);
+    }
+    fetchProducts();
+  }, []);
+
   const [optionSelected, setOptionSelected] = useState<string>(
     options[0].value,
   );
@@ -54,16 +64,14 @@ export default function App() {
     setOptionSelected(option);
   };
 
-  const buyProduct = (id: string) => {
-    removeProduct(id);
+  const buyProduct = async (id: string) => {
+    deleteProduct(id);
+    await getAllProducts();
   };
 
-  const editProduct = (id: string) => {
-    console.log(id);
-  };
-
-  const removeProduct = (id: string) => {
-    setProducts((products) => products.filter((product) => product.id !== id));
+  const removeProduct = async (id: string) => {
+    deleteProduct(id);
+    await getAllProducts();
   };
 
   const firstLetterUppercase = (str: string) => {
@@ -134,7 +142,6 @@ export default function App() {
             </Button>
             <AddProductDialog
               categories={categories}
-              setProducts={setProducts}
               open={open}
               setOpen={setOpen}
             />
@@ -237,7 +244,7 @@ export default function App() {
                           <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => editProduct(id)}
+                            onClick={() => setOpen(true)}
                           >
                             <IconEdit stroke={2} />
                           </Button>
