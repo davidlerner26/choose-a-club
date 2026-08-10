@@ -6,5 +6,5 @@ export type Product = {
   category: string;
   store: string;
   url: string;
-  currency: string;
+  bought?: boolean;
 };

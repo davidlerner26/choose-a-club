@@ -39,16 +39,16 @@ export async function getAllProducts(): Promise<Product[]> {
   })) as Product[];
 }
 
-export function createProduct(product: Product) {
-  return addDoc(products, product);
+export async function createProduct(product: Product) {
+  return await addDoc(products, product);
 }
 
-export function updateProduct(id: string, product: Partial<Product>) {
-  return updateDoc(doc(db, 'products', id), product);
+export async function updateProduct(id: string, product: Partial<Product>) {
+  return await updateDoc(doc(db, 'products', id), product);
 }
 
-export function deleteProduct(id: string) {
-  return deleteDoc(doc(db, 'products', id));
+export async function deleteProduct(id: string) {
+  return await deleteDoc(doc(db, 'products', id));
 }
 
 export async function getProduct(id: string): Promise<Product | null> {

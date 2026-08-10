@@ -7,18 +7,32 @@ import {
   IconCheck,
   IconEdit,
   IconExternalLink,
+  IconPlus,
   IconRefresh,
   IconX,
 } from '@tabler/icons-react';
 import { Card, CardContent, CardFooter } from './components/ui/card';
 import './App.css';
 import NoProductsFound from './components/no-products-found.component';
-import { deleteProduct, getAllProducts } from './firebase/firebase';
+import {
+  deleteProduct,
+  getAllProducts,
+  updateProduct,
+} from './firebase/firebase';
 import { Input } from './components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+
+export type Option = {
+  value: string;
+  selected: boolean;
+  bought: boolean;
+};
 
 export default function App() {
-  const [open, setOpen] = useState<boolean>(false);
-  const [id, setId] = useState<string | null>(null);
+  const options: Option[] = [
+    { value: 'Desejando', selected: false, bought: false },
+    { value: 'Já comprei', selected: false, bought: true },
+  ];
 
   const categories = [
     'Tudo',
@@ -35,24 +49,30 @@ export default function App() {
     'Perucas',
     'Outros',
   ];
-  const options = [
-    { value: 'Desejando', selected: false },
-    { value: 'Já comprei', selected: false },
-  ];
 
+  const [open, setOpen] = useState<boolean>(false);
+  const [id, setId] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [optionSelected, setOptionSelected] = useState<string>();
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+
+  const selectOption = (option: Option) => {
+    setOptionSelected(option.value);
+    setProducts((products) =>
+      products.filter((product) => product.bought === option.bought),
+    );
+  };
 
   useEffect(() => {
     async function fetchProducts() {
       const response = await getAllProducts();
       setProducts(response);
+      selectOption(options[0]);
+      setIsLoading(false);
     }
     fetchProducts();
   }, []);
-
-  const [optionSelected, setOptionSelected] = useState<string>(
-    options[0].value,
-  );
 
   const selectCategory = (category: string) => {
     if (category === selectedCategory) return;
@@ -62,12 +82,26 @@ export default function App() {
     );
   };
 
-  const selectOption = (option: string) => {
-    setOptionSelected(option);
-  };
-
-  const buyProduct = async (id: string) => {
-    deleteProduct(id);
+  const buyProduct = async ({
+    id,
+    name,
+    price,
+    link,
+    store,
+    category,
+    url,
+  }) => {
+    const product: Product = {
+      id,
+      name,
+      price,
+      link,
+      store,
+      category,
+      url,
+      bought: true,
+    };
+    await updateProduct(id, product);
     await getAllProducts();
   };
 
@@ -77,43 +111,33 @@ export default function App() {
   };
 
   const removeProduct = async (id: string) => {
-    deleteProduct(id);
+    setIsLoading(true);
+    await deleteProduct(id);
     await getAllProducts();
+    setIsLoading(false);
   };
 
   const firstLetterUppercase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
 
-  const productsWithChoosenCurrency = (currency: string) => {
-    return products?.find((product) => product.currency === currency);
+  const priceWithCurrency = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(price);
   };
-
-  const priceWithCurrency = (price: number, currency: string) => {
-    switch (currency) {
-      case 'BRL':
-        return new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-        }).format(price);
-      case 'USD':
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-        }).format(price);
-      default:
-        return price;
-    }
-  };
-
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
   const focusInput = () => {
     const input = document.getElementById('link');
     input?.focus();
   };
 
-  return (
+  return isLoading ? (
+    <div className="flex items-center justify-center w-screen h-screen">
+      <Spinner />
+    </div>
+  ) : (
     <main className="m-auto max-w-6xl mt-8">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
@@ -127,23 +151,9 @@ export default function App() {
               <span className="mr-4">
                 {priceWithCurrency(
                   products?.reduce((acc, product) => {
-                    if (product.currency === 'BRL') {
-                      return acc + product.price;
-                    }
+                    return acc + product.price;
                   }, 0),
-                  'BRL',
                 )}
-              </span>
-              <span>
-                {productsWithChoosenCurrency('USD') &&
-                  priceWithCurrency(
-                    products?.reduce(
-                      (acc, product) =>
-                        product.currency === 'USD' ? acc + product.price : 0,
-                      0,
-                    ),
-                    'USD',
-                  )}
               </span>
             </p>
           </div>
@@ -152,13 +162,23 @@ export default function App() {
               <IconRefresh data-icon="inline-start" />
               Atualizar
             </Button>
-            <AddProductDialog
-              categories={categories}
-              open={open}
-              setOpen={setOpen}
-              id={id}
-              setId={setId}
-            />
+            <Button
+              size="lg"
+              className="bg-red-700 hover:bg-red-800"
+              onClick={() => setOpen(true)}
+            >
+              <IconPlus></IconPlus>
+              Adicionar produto
+            </Button>
+            {open && (
+              <AddProductDialog
+                categories={categories}
+                open={open}
+                setOpen={setOpen}
+                id={id}
+                setId={setId}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -180,7 +200,7 @@ export default function App() {
             <Button
               variant="link"
               size="xs"
-              onClick={() => selectOption(option.value)}
+              onClick={() => selectOption(option)}
               key={option.value}
               className={
                 option.value === optionSelected ? 'underline text-red-700' : ''
@@ -213,7 +233,7 @@ export default function App() {
         {products?.length > 0 ? (
           <ul className="grid grid-cols-4 gap-4">
             {products?.map(
-              ({ id, name, price, link, store, category, url, currency }) => (
+              ({ id, name, price, link, store, category, url, bought }) => (
                 <li key={id}>
                   <Card>
                     <CardContent>
@@ -230,9 +250,7 @@ export default function App() {
                         {firstLetterUppercase(name)}
                       </p>
                       <p className="text-red-700 text-lg">
-                        {price
-                          ? priceWithCurrency(price, currency)
-                          : 'preço a conferir'}
+                        {price ? priceWithCurrency(price) : 'preço a conferir'}
                       </p>
                     </CardContent>
                     <CardFooter>
@@ -247,29 +265,41 @@ export default function App() {
                             <IconExternalLink stroke={2} />
                           </a>
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => buyProduct(id)}
-                          >
-                            <IconCheck stroke={2} />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => editProduct(id)}
-                          >
-                            <IconEdit stroke={2} />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => removeProduct(id)}
-                          >
-                            <IconX stroke={2} />
-                          </Button>
-                        </div>
+                        {!bought && (
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() =>
+                                buyProduct({
+                                  id,
+                                  name,
+                                  price,
+                                  link,
+                                  store,
+                                  category,
+                                  url,
+                                })
+                              }
+                            >
+                              <IconCheck stroke={2} />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => editProduct(id)}
+                            >
+                              <IconEdit stroke={2} />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => removeProduct(id)}
+                            >
+                              <IconX stroke={2} />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </CardFooter>
                   </Card>

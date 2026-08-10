@@ -6,7 +6,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from './ui/dialog';
 import { Field, FieldError, FieldGroup, FieldLabel } from './ui/field';
 import { Input } from './ui/input';
@@ -23,9 +22,9 @@ import {
   SelectValue,
 } from './ui/select';
 import type { Product } from '@/types';
-import { IconPlus } from '@tabler/icons-react';
 import { createProduct, getProduct, updateProduct } from '@/firebase/firebase';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Spinner } from './ui/spinner';
 
 export default function AddProductDialog({
   categories,
@@ -34,6 +33,8 @@ export default function AddProductDialog({
   id,
   setId,
 }) {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const {
     register,
     handleSubmit,
@@ -42,16 +43,15 @@ export default function AddProductDialog({
     reset,
   } = useForm<Product>();
 
-  const onSubmit: SubmitHandler<Product> = (data) => {
+  const onSubmit: SubmitHandler<Product> = async (data) => {
     const product: Product = {
       ...data,
       price: Number(data.price),
-      currency: 'BRL',
     };
     if (id) {
-      updateProduct(id, product);
+      await updateProduct(id, product);
     } else {
-      createProduct(product);
+      await createProduct(product);
     }
     resetFields(false);
   };
@@ -65,21 +65,26 @@ export default function AddProductDialog({
   };
 
   const setFieldsDefaultValues = (product: Product) => {
+    const { link, name, price, category, store, url } = product;
     reset({
-      link: product?.link || '',
-      name: product?.name || '',
-      price: product?.price || 0,
-      category: product?.category || '',
-      store: product?.store || '',
-      url: product?.url || '',
+      link: link || '',
+      name: name || '',
+      price: price || 0,
+      category: category || '',
+      store: store || '',
+      url: url || '',
     });
   };
 
   useEffect(() => {
     async function fetchProduct() {
       if (id) {
+        setIsLoading(true);
         const response = await getProduct(id);
-        setFieldsDefaultValues(response);
+        if (response) {
+          setFieldsDefaultValues(response);
+        }
+        setIsLoading(false);
       }
     }
     fetchProduct();
@@ -87,15 +92,11 @@ export default function AddProductDialog({
 
   return (
     <Dialog open={open} onOpenChange={resetFields}>
-      <form>
-        <DialogTrigger
-          render={
-            <Button size="lg" className="bg-red-700 hover:bg-red-800">
-              <IconPlus></IconPlus>
-              Adicionar produto
-            </Button>
-          }
-        />
+      {isLoading ? (
+        <div className="flex items-center justify-center w-screen h-screen">
+          <Spinner />
+        </div>
+      ) : (
         <DialogContent className="sm:max-w-sm">
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
@@ -202,7 +203,7 @@ export default function AddProductDialog({
             </DialogFooter>
           </form>
         </DialogContent>
-      </form>
+      )}
     </Dialog>
   );
 }
