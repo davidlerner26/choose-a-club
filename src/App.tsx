@@ -14,9 +14,11 @@ import { Card, CardContent, CardFooter } from './components/ui/card';
 import './App.css';
 import NoProductsFound from './components/no-products-found.component';
 import { deleteProduct, getAllProducts } from './firebase/firebase';
+import { Input } from './components/ui/input';
 
 export default function App() {
   const [open, setOpen] = useState<boolean>(false);
+  const [id, setId] = useState<string | null>(null);
 
   const categories = [
     'Tudo',
@@ -69,6 +71,11 @@ export default function App() {
     await getAllProducts();
   };
 
+  const editProduct = (id: string) => {
+    setId(id);
+    setOpen(true);
+  };
+
   const removeProduct = async (id: string) => {
     deleteProduct(id);
     await getAllProducts();
@@ -100,6 +107,11 @@ export default function App() {
   };
 
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+
+  const focusInput = () => {
+    const input = document.getElementById('link');
+    input?.focus();
+  };
 
   return (
     <main className="m-auto max-w-6xl mt-8">
@@ -144,6 +156,8 @@ export default function App() {
               categories={categories}
               open={open}
               setOpen={setOpen}
+              id={id}
+              setId={setId}
             />
           </div>
         </div>
@@ -180,7 +194,7 @@ export default function App() {
 
       <hr className="mt-10 mb-10" />
 
-      {/* <div className="flex gap-3 items-center mb-6">
+      <div className="flex gap-3 items-center mb-6">
         <Input
           id="link"
           name="link"
@@ -193,7 +207,7 @@ export default function App() {
         >
           Adicionar
         </Button>
-      </div> */}
+      </div>
 
       <div>
         {products?.length > 0 ? (
@@ -244,7 +258,7 @@ export default function App() {
                           <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => setOpen(true)}
+                            onClick={() => editProduct(id)}
                           >
                             <IconEdit stroke={2} />
                           </Button>
@@ -264,7 +278,7 @@ export default function App() {
             )}
           </ul>
         ) : (
-          <NoProductsFound setOpen={setOpen} />
+          <NoProductsFound focusInput={focusInput} />
         )}
       </div>
     </main>

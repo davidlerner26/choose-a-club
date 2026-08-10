@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
-import { getDocs, getFirestore } from 'firebase/firestore';
+import { getDoc, getDocs, getFirestore } from 'firebase/firestore';
 import {
   addDoc,
   collection,
@@ -43,10 +43,23 @@ export function createProduct(product: Product) {
   return addDoc(products, product);
 }
 
-export function editProduct(id: string, product: Partial<Product>) {
+export function updateProduct(id: string, product: Partial<Product>) {
   return updateDoc(doc(db, 'products', id), product);
 }
 
 export function deleteProduct(id: string) {
   return deleteDoc(doc(db, 'products', id));
+}
+
+export async function getProduct(id: string): Promise<Product | null> {
+  const snapshot = await getDoc(doc(db, 'products', id));
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return {
+    id: snapshot.id,
+    ...snapshot.data(),
+  } as Product;
 }

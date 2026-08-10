@@ -24,9 +24,16 @@ import {
 } from './ui/select';
 import type { Product } from '@/types';
 import { IconPlus } from '@tabler/icons-react';
-import { createProduct } from '@/firebase/firebase';
+import { createProduct, getProduct, updateProduct } from '@/firebase/firebase';
+import { useEffect } from 'react';
 
-export default function AddProductDialog({ categories, open, setOpen }) {
+export default function AddProductDialog({
+  categories,
+  open,
+  setOpen,
+  id,
+  setId,
+}) {
   const {
     register,
     handleSubmit,
@@ -34,31 +41,49 @@ export default function AddProductDialog({ categories, open, setOpen }) {
     formState: { errors },
     reset,
   } = useForm<Product>();
+
   const onSubmit: SubmitHandler<Product> = (data) => {
-    // setProducts((products) => [
-    //   ...products,
-    //   {
-    //     ...data,
-    //     id: crypto.randomUUID(),
-    //     price: Number(data.price),
-    //     currency: 'BRL',
-    //   },
-    // ]);
     const product: Product = {
       ...data,
       price: Number(data.price),
       currency: 'BRL',
     };
-    createProduct(product);
+    if (id) {
+      updateProduct(id, product);
+    } else {
+      createProduct(product);
+    }
     resetFields(false);
   };
 
   const resetFields = (open: boolean) => {
     setOpen(open);
     if (!open) {
+      setId(null);
       reset();
     }
   };
+
+  const setFieldsDefaultValues = (product: Product) => {
+    reset({
+      link: product?.link || '',
+      name: product?.name || '',
+      price: product?.price || 0,
+      category: product?.category || '',
+      store: product?.store || '',
+      url: product?.url || '',
+    });
+  };
+
+  useEffect(() => {
+    async function fetchProduct() {
+      if (id) {
+        const response = await getProduct(id);
+        setFieldsDefaultValues(response);
+      }
+    }
+    fetchProduct();
+  }, [id]);
 
   return (
     <Dialog open={open} onOpenChange={resetFields}>
