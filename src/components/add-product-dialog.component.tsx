@@ -32,8 +32,7 @@ export default function AddProductDialog({
   setOpen,
   id,
   setId,
-  setProducts,
-  getAllProducts,
+  updateProducts,
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -57,8 +56,7 @@ export default function AddProductDialog({
       await createProduct(product);
     }
     resetFields(false);
-    const response = await getAllProducts();
-    setProducts(response);
+    await updateProducts();
   };
 
   const resetFields = (open: boolean) => {
@@ -141,6 +139,8 @@ export default function AddProductDialog({
                   id="price"
                   name="price"
                   placeholder="189,90"
+                  type="number"
+                  step="0.01"
                   {...register('price', { required: 'Preço é obrigatório' })}
                 />
                 <FieldError>{errors.price?.message}</FieldError>

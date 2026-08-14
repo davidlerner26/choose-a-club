@@ -53,24 +53,29 @@ export default function App() {
   const [open, setOpen] = useState<boolean>(false);
   const [id, setId] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [productsView, setProductsView] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [optionSelected, setOptionSelected] = useState<string>();
+  const [optionSelected, setOptionSelected] = useState<boolean>();
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
-  const selectOption = (option: Option) => {
-    setOptionSelected(option.value);
-    setProducts((products) =>
-      products.filter((product) => product.bought === option.bought),
+  const selectOption = (option: Option, productList: Product[] = products) => {
+    setOptionSelected(option.bought);
+    setProductsView(
+      productList.filter((product) => product.bought === option.bought),
     );
+  };
+
+  const updateProducts = async () => {
+    setIsLoading(true);
+    const response = await getAllProducts();
+    setProducts(response);
+    selectOption(options[0], response);
+    setIsLoading(false);
   };
 
   useEffect(() => {
     async function fetchProducts() {
-      setIsLoading(true);
-      const response = await getAllProducts();
-      setProducts(response);
-      selectOption(options[0]);
-      setIsLoading(false);
+      await updateProducts();
     }
     fetchProducts();
   }, []);
@@ -78,7 +83,7 @@ export default function App() {
   const selectCategory = (category: string) => {
     if (category === selectedCategory) return;
     setSelectedCategory(category);
-    setProducts((products) =>
+    setProductsView(
       products.filter((product) => product.category === category),
     );
   };
@@ -104,9 +109,7 @@ export default function App() {
       bought: true,
     };
     await updateProduct(id, product);
-    const response = await getAllProducts();
-    setProducts(response);
-    setIsLoading(false);
+    await updateProducts();
   };
 
   const editProduct = (id: string) => {
@@ -117,9 +120,7 @@ export default function App() {
   const removeProduct = async (id: string) => {
     setIsLoading(true);
     await deleteProduct(id);
-    const response = await getAllProducts();
-    setProducts(response);
-    setIsLoading(false);
+    await updateProducts();
   };
 
   const firstLetterUppercase = (str: string) => {
@@ -151,11 +152,14 @@ export default function App() {
         </div>
         <div className="flex items-center gap-4">
           <div>
-            <p className="text-right">{products?.length} peças desejadas</p>
+            <p className="text-right">
+              {productsView?.length} peças
+              {optionSelected ? ' compradas' : ' desejadas'}
+            </p>
             <p className="text-right text-red-700">
               <span className="mr-4">
                 {priceWithCurrency(
-                  products?.reduce((acc, product) => {
+                  productsView?.reduce((acc, product) => {
                     return acc + product.price;
                   }, 0),
                 )}
@@ -163,7 +167,7 @@ export default function App() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => updateProducts()}>
               <IconRefresh data-icon="inline-start" />
               Atualizar
             </Button>
@@ -182,8 +186,7 @@ export default function App() {
                 setOpen={setOpen}
                 id={id}
                 setId={setId}
-                setProducts={setProducts}
-                getAllProducts={getAllProducts}
+                updateProducts={updateProducts}
               />
             )}
           </div>
@@ -210,7 +213,7 @@ export default function App() {
               onClick={() => selectOption(option)}
               key={option.value}
               className={
-                option.value === optionSelected ? 'underline text-red-700' : ''
+                option.bought === optionSelected ? 'underline text-red-700' : ''
               }
             >
               {option.value}
@@ -233,11 +236,11 @@ export default function App() {
       </div>
 
       <div>
-        {products?.length > 0 ? (
+        {productsView?.length > 0 ? (
           <ul className="grid grid-cols-4 gap-4">
-            {products?.map(
+            {productsView?.map(
               ({ id, name, price, link, store, category, url, bought }) => (
-                <li key={id}>
+                <li key={id} title={name}>
                   <Card>
                     <CardContent>
                       <div
