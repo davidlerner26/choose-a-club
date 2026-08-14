@@ -149,29 +149,30 @@ export default function App() {
 
   return isLoading ? (
     <div className="flex items-center justify-center w-screen h-screen">
-      <Spinner />
+      <Spinner className="text-primary" />
     </div>
   ) : (
-    <main className="m-auto max-w-6xl mt-8">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <img className="w-12" src="favicon.svg" />
-          <h1 className="text-3xl">Bambina</h1>
+    <main className="m-auto max-w-6xl mt-8 px-4 pb-16">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b">
+        <div className="flex items-center gap-2.5">
+          <img className="w-10" src="favicon.svg" />
+          <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
+            Bambina
+          </h1>
         </div>
         <div className="flex items-center gap-4">
-          <div>
-            <p className="text-right">
-              {productsView?.length} peças
+          <div className="flex flex-col items-end rounded-lg bg-accent px-4 py-2">
+            <p className="text-sm text-accent-foreground">
+              {productsView?.length}{' '}
+              {productsView?.length === 1 ? 'peça' : 'peças'}
               {optionSelected ? ' compradas' : ' desejadas'}
             </p>
-            <p className="text-right text-red-700">
-              <span className="mr-4">
-                {priceWithCurrency(
-                  productsView?.reduce((acc, product) => {
-                    return acc + product.price;
-                  }, 0),
-                )}
-              </span>
+            <p className="text-lg font-semibold text-primary">
+              {priceWithCurrency(
+                productsView?.reduce((acc, product) => {
+                  return acc + product.price;
+                }, 0),
+              )}
             </p>
           </div>
           <div className="flex gap-3">
@@ -179,11 +180,7 @@ export default function App() {
               <IconRefresh data-icon="inline-start" />
               Atualizar
             </Button>
-            <Button
-              size="lg"
-              className="bg-red-700 hover:bg-red-800"
-              onClick={() => setOpen(true)}
-            >
+            <Button size="lg" onClick={() => setOpen(true)}>
               <IconPlus></IconPlus>
               Adicionar produto
             </Button>
@@ -201,27 +198,31 @@ export default function App() {
         </div>
       </div>
 
-      <div className="flex gap-4 items-center">
-        <div className="flex gap-2 pr-4 border-r">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap gap-2">
           {categories.map((category) => (
             <Badge
               variant={selectedCategory === category ? 'default' : 'outline'}
               key={category}
               onClick={() => selectCategory(category)}
+              className="cursor-pointer select-none transition-colors hover:bg-accent hover:text-accent-foreground data-[selected=true]:hover:bg-primary/90"
+              data-selected={selectedCategory === category}
             >
               {category}
             </Badge>
           ))}
         </div>
-        <div className="flex">
+        <div className="flex gap-1 rounded-full bg-muted p-1">
           {options.map((option) => (
             <Button
-              variant="link"
-              size="xs"
+              variant="ghost"
+              size="sm"
               onClick={() => selectOption(option)}
               key={option.value}
               className={
-                option.bought === optionSelected ? 'underline text-red-700' : ''
+                option.bought === optionSelected
+                  ? 'rounded-full bg-card text-primary shadow-sm hover:bg-card'
+                  : 'rounded-full text-muted-foreground hover:bg-transparent'
               }
             >
               {option.value}
@@ -230,7 +231,7 @@ export default function App() {
         </div>
       </div>
 
-      <hr className="mt-10 mb-10" />
+      <hr className="mt-8 mb-8" />
 
       {/* <div className="flex gap-3 items-center mb-6">
         <Input id="link" name="link" placeholder="Cole o link da peça aqui" />
@@ -245,25 +246,25 @@ export default function App() {
 
       <div>
         {productsView?.length > 0 ? (
-          <ul className="grid grid-cols-4 gap-4">
+          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
             {productsView?.map(
               ({ id, name, price, link, store, category, url, bought }) => (
                 <li key={id} title={name}>
-                  <Card>
+                  <Card className="h-full transition-shadow hover:shadow-md">
                     <CardContent>
                       <div
-                        className="h-80 mb-3 rounded-md"
+                        className="h-80 mb-3 rounded-lg bg-muted"
                         style={{
                           background: `url(${url}) center center / contain no-repeat`,
                         }}
                       ></div>
-                      <p className="truncate">
-                        {store.toUpperCase()} · {category.toUpperCase()}
+                      <p className="truncate text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                        {store} · {category}
                       </p>
-                      <p className="font-bold text-lg truncate">
+                      <p className="font-semibold text-lg truncate">
                         {firstLetterUppercase(name)}
                       </p>
-                      <p className="text-red-700 text-lg">
+                      <p className="text-primary font-semibold">
                         {price ? priceWithCurrency(price) : 'preço a conferir'}
                       </p>
                     </CardContent>
@@ -273,6 +274,7 @@ export default function App() {
                           <a
                             href={link}
                             target="_blank"
+                            rel="noopener noreferrer"
                             className={buttonVariants({ variant: 'link' })}
                           >
                             Ver na loja
