@@ -66,6 +66,7 @@ export default function App() {
 
   useEffect(() => {
     async function fetchProducts() {
+      setIsLoading(true);
       const response = await getAllProducts();
       setProducts(response);
       selectOption(options[0]);
@@ -91,6 +92,7 @@ export default function App() {
     category,
     url,
   }) => {
+    setIsLoading(true);
     const product: Product = {
       id,
       name,
@@ -102,7 +104,9 @@ export default function App() {
       bought: true,
     };
     await updateProduct(id, product);
-    await getAllProducts();
+    const response = await getAllProducts();
+    setProducts(response);
+    setIsLoading(false);
   };
 
   const editProduct = (id: string) => {
@@ -113,7 +117,8 @@ export default function App() {
   const removeProduct = async (id: string) => {
     setIsLoading(true);
     await deleteProduct(id);
-    await getAllProducts();
+    const response = await getAllProducts();
+    setProducts(response);
     setIsLoading(false);
   };
 
@@ -177,6 +182,8 @@ export default function App() {
                 setOpen={setOpen}
                 id={id}
                 setId={setId}
+                setProducts={setProducts}
+                getAllProducts={getAllProducts}
               />
             )}
           </div>
@@ -215,11 +222,7 @@ export default function App() {
       <hr className="mt-10 mb-10" />
 
       <div className="flex gap-3 items-center mb-6">
-        <Input
-          id="link"
-          name="link"
-          placeholder="Cole o link da peça aqui - ela entra sozinha ✨"
-        />
+        <Input id="link" name="link" placeholder="Cole o link da peça aqui" />
         <Button
           size="lg"
           className="bg-red-700 hover:bg-red-800"

@@ -32,6 +32,8 @@ export default function AddProductDialog({
   setOpen,
   id,
   setId,
+  setProducts,
+  getAllProducts,
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -47,6 +49,7 @@ export default function AddProductDialog({
     const product: Product = {
       ...data,
       price: Number(data.price),
+      bought: false,
     };
     if (id) {
       await updateProduct(id, product);
@@ -54,6 +57,8 @@ export default function AddProductDialog({
       await createProduct(product);
     }
     resetFields(false);
+    const response = await getAllProducts();
+    setProducts(response);
   };
 
   const resetFields = (open: boolean) => {
@@ -84,20 +89,20 @@ export default function AddProductDialog({
         if (response) {
           setFieldsDefaultValues(response);
         }
-        setIsLoading(false);
       }
+      setIsLoading(false);
     }
     fetchProduct();
   }, [id]);
 
   return (
     <Dialog open={open} onOpenChange={resetFields}>
-      {isLoading ? (
-        <div className="flex items-center justify-center w-screen h-screen">
-          <Spinner />
-        </div>
-      ) : (
-        <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm">
+        {isLoading ? (
+          <div className="flex items-center justify-center w-screen h-screen">
+            <Spinner />
+          </div>
+        ) : (
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
               <DialogTitle>Nova peça</DialogTitle>
@@ -202,8 +207,8 @@ export default function AddProductDialog({
               <Button type="submit">Adicionar à wishlist</Button>
             </DialogFooter>
           </form>
-        </DialogContent>
-      )}
+        )}
+      </DialogContent>
     </Dialog>
   );
 }
