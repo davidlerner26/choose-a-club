@@ -153,15 +153,15 @@ export default function App() {
     </div>
   ) : (
     <main className="m-auto max-w-6xl mt-8 px-4 pb-16">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-6 border-b">
         <div className="flex items-center gap-2.5">
           <img className="w-10" src="favicon.svg" />
           <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
             Bambina
           </h1>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-end rounded-lg bg-accent px-4 py-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex flex-col items-end rounded-lg bg-accent px-4 py-2 self-start sm:self-auto">
             <p className="text-sm text-accent-foreground">
               {productsView?.length}{' '}
               {productsView?.length === 1 ? 'peça' : 'peças'}
@@ -175,7 +175,7 @@ export default function App() {
               )}
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={() => refreshProducts()}>
               <IconRefresh data-icon="inline-start" />
               Atualizar
@@ -198,7 +198,7 @@ export default function App() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => (
             <Badge
@@ -246,14 +246,14 @@ export default function App() {
 
       <div>
         {productsView?.length > 0 ? (
-          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {productsView?.map(
               ({ id, name, price, link, store, category, url, bought }) => (
                 <li key={id} title={name}>
                   <Card className="h-full transition-shadow hover:shadow-md">
                     <CardContent>
                       <div
-                        className="h-80 mb-3 rounded-lg bg-muted"
+                        className="h-64 sm:h-80 mb-3 rounded-lg bg-muted"
                         style={{
                           background: `url(${url}) center center / contain no-repeat`,
                         }}
