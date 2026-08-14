@@ -33,6 +33,13 @@ export default function AddProductDialog({
   id,
   setId,
   updateProducts,
+}: {
+  categories: string[];
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  id: string | null;
+  setId: (id: string | null) => void;
+  updateProducts: () => Promise<void>;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -113,7 +120,6 @@ export default function AddProductDialog({
                 <Label htmlFor="link">Link da loja</Label>
                 <Input
                   id="link"
-                  name="link"
                   placeholder="https://loja.com.br/vestido..."
                   {...register('link', {
                     required: 'Link da loja é obrigatório',
@@ -125,7 +131,6 @@ export default function AddProductDialog({
                 <Label htmlFor="name">Nome da peça</Label>
                 <Input
                   id="name"
-                  name="name"
                   placeholder="Vestido midi de linho"
                   {...register('name', {
                     required: 'Link da loja é obrigatório',
@@ -137,7 +142,6 @@ export default function AddProductDialog({
                 <Label htmlFor="price">Preço (R$)</Label>
                 <Input
                   id="price"
-                  name="price"
                   placeholder="189,90"
                   type="number"
                   step="0.01"
@@ -152,11 +156,7 @@ export default function AddProductDialog({
                   control={control}
                   rules={{ required: 'Categoria é obrigatória' }}
                   render={({ field }) => (
-                    <Select
-                      items={categories}
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Escolhe uma categoria" />
                       </SelectTrigger>
@@ -178,7 +178,6 @@ export default function AddProductDialog({
                 <Label htmlFor="store">Loja</Label>
                 <Input
                   id="store"
-                  name="store"
                   {...register('store', {
                     required: 'Nome da loja é obrigatório',
                   })}
@@ -193,7 +192,6 @@ export default function AddProductDialog({
                 <Label htmlFor="url">URL da imagem</Label>
                 <Input
                   id="url"
-                  name="url"
                   placeholder="Cole aqui a URL da imagem"
                   {...register('url', {
                     required: 'URL da imagem é obrigatório',

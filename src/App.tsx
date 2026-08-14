@@ -104,7 +104,7 @@ export default function App() {
     store,
     category,
     url,
-  }) => {
+  }: Product) => {
     setIsLoading(true);
     const product: Product = {
       id,
@@ -157,7 +157,7 @@ export default function App() {
         <div className="flex items-center gap-2.5">
           <img className="w-10" src="favicon.svg" />
           <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
-            Bambina
+            The Bambina's Club
           </h1>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
