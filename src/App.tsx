@@ -19,7 +19,6 @@ import {
   getAllProducts,
   updateProduct,
 } from './firebase/firebase';
-import { Input } from './components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 
 export type Option = {
@@ -48,6 +47,8 @@ export default function App() {
     'Jogos',
     'Perucas',
     'Outros',
+    'Roupas de verão',
+    'Roupas de festa',
   ];
 
   const [open, setOpen] = useState<boolean>(false);
@@ -63,6 +64,11 @@ export default function App() {
     setProductsView(
       productList.filter((product) => product.bought === option.bought),
     );
+  };
+
+  const refreshProducts = async () => {
+    await updateProducts();
+    selectCategory(selectedCategory);
   };
 
   const updateProducts = async () => {
@@ -84,7 +90,9 @@ export default function App() {
     if (category === selectedCategory) return;
     setSelectedCategory(category);
     setProductsView(
-      products.filter((product) => product.category === category),
+      selectedCategory
+        ? products.filter((product) => product.category === category)
+        : products,
     );
   };
 
@@ -134,10 +142,10 @@ export default function App() {
     }).format(price);
   };
 
-  const focusInput = () => {
-    const input = document.getElementById('link');
-    input?.focus();
-  };
+  // const focusInput = () => {
+  //   const input = document.getElementById('link');
+  //   input?.focus();
+  // };
 
   return isLoading ? (
     <div className="flex items-center justify-center w-screen h-screen">
@@ -167,7 +175,7 @@ export default function App() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => updateProducts()}>
+            <Button variant="outline" onClick={() => refreshProducts()}>
               <IconRefresh data-icon="inline-start" />
               Atualizar
             </Button>
@@ -224,7 +232,7 @@ export default function App() {
 
       <hr className="mt-10 mb-10" />
 
-      <div className="flex gap-3 items-center mb-6">
+      {/* <div className="flex gap-3 items-center mb-6">
         <Input id="link" name="link" placeholder="Cole o link da peça aqui" />
         <Button
           size="lg"
@@ -233,7 +241,7 @@ export default function App() {
         >
           Adicionar
         </Button>
-      </div>
+      </div> */}
 
       <div>
         {productsView?.length > 0 ? (
@@ -314,7 +322,7 @@ export default function App() {
             )}
           </ul>
         ) : (
-          <NoProductsFound focusInput={focusInput} />
+          <NoProductsFound />
         )}
       </div>
     </main>
