@@ -8,3 +8,9 @@ export type Product = {
   url: string;
   bought?: boolean;
 };
+
+export type Option = {
+  value: string;
+  selected: boolean;
+  bought: boolean;
+};

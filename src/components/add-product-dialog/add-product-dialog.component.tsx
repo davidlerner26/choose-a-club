@@ -6,13 +6,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog';
-import { Field, FieldError, FieldGroup, FieldLabel } from './ui/field';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+} from '@/components/ui/dialog';
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 import { Controller, useForm, type SubmitHandler } from 'react-hook-form';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -20,11 +25,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
+} from '@/components/ui/select';
 import type { Product } from '@/types';
 import { createProduct, getProduct, updateProduct } from '@/firebase/firebase';
 import { useEffect, useState } from 'react';
-import { Spinner } from './ui/spinner';
+import { Spinner } from '@/components/ui/spinner';
 
 function formatCentsToPtBr(cents: number): string {
   return (cents / 100).toLocaleString('pt-BR', {
