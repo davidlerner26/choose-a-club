@@ -90,9 +90,9 @@ export default function App() {
     if (category === selectedCategory) return;
     setSelectedCategory(category);
     setProductsView(
-      selectedCategory
-        ? products.filter((product) => product.category === category)
-        : products,
+      category === 'Tudo'
+        ? products
+        : products.filter((product) => product.category === category),
     );
   };
 
