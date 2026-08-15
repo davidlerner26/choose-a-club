@@ -154,7 +154,7 @@ export default function App() {
     console.log(response);
   };
 
-  async function extrairPeca(link) {
+  async function extrairPeca(link: string) {
     const r = await fetch(
       '/.netlify/functions/extrair?url=' + encodeURIComponent(link),
     );
