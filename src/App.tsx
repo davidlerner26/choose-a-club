@@ -144,14 +144,18 @@ export default function App() {
     }).format(price);
   };
 
-  // const focusInput = () => {
-  //   const input = document.getElementById('link');
-  //   input?.focus();
-  // };
+  const focusInput = () => {
+    const input = document.getElementById('link');
+    input?.focus();
+  };
 
   const search = async () => {
-    const response = await extrairPeca(link);
-    console.log(response);
+    if (link) {
+      const response = await extrairPeca(link);
+      console.log(response);
+    } else {
+      focusInput();
+    }
   };
 
   async function extrairPeca(link: string) {
@@ -167,12 +171,12 @@ export default function App() {
 
     return {
       id: crypto.randomUUID(),
-      nome: d.nome,
+      name: d.nome,
       marca: d.marca,
-      preco: d.preco,
+      price: d.preco,
       precoDe: d.precoDe,
       imagem: d.imagem,
-      loja: d.loja,
+      store: d.loja,
       link: d.link,
       disponivel: d.disponivel,
       adicionadoEm: new Date().toISOString(),
