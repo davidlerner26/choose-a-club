@@ -26,6 +26,13 @@ import { createProduct, getProduct, updateProduct } from '@/firebase/firebase';
 import { useEffect, useState } from 'react';
 import { Spinner } from './ui/spinner';
 
+function formatCentsToPtBr(cents: number): string {
+  return (cents / 100).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export default function AddProductDialog({
   categories,
   open,
@@ -42,6 +49,7 @@ export default function AddProductDialog({
   updateProducts: () => Promise<void>;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [priceDisplay, setPriceDisplay] = useState<string>('0,00');
 
   const {
     register,
@@ -71,6 +79,7 @@ export default function AddProductDialog({
     if (!open) {
       setId(null);
       reset();
+      setPriceDisplay('0,00');
     }
   };
 
@@ -84,6 +93,7 @@ export default function AddProductDialog({
       store: store || '',
       url: url || '',
     });
+    setPriceDisplay(formatCentsToPtBr(Math.round((price || 0) * 100)));
   };
 
   useEffect(() => {
@@ -140,12 +150,28 @@ export default function AddProductDialog({
               </Field>
               <Field>
                 <Label htmlFor="price">Preço (R$)</Label>
-                <Input
-                  id="price"
-                  placeholder="189,90"
-                  type="number"
-                  step="0.01"
-                  {...register('price', { required: 'Preço é obrigatório' })}
+                <Controller
+                  name="price"
+                  control={control}
+                  rules={{
+                    validate: (value) =>
+                      Number(value) > 0 || 'Preço é obrigatório',
+                  }}
+                  render={({ field }) => (
+                    <Input
+                      id="price"
+                      inputMode="numeric"
+                      placeholder="0,00"
+                      value={priceDisplay}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, '');
+                        const cents = digits ? parseInt(digits, 10) : 0;
+                        setPriceDisplay(formatCentsToPtBr(cents));
+                        field.onChange(cents / 100);
+                      }}
+                      onBlur={field.onBlur}
+                    />
+                  )}
                 />
                 <FieldError>{errors.price?.message}</FieldError>
               </Field>
