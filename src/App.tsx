@@ -20,6 +20,7 @@ import {
   updateProduct,
 } from './firebase/firebase';
 import { Spinner } from '@/components/ui/spinner';
+import { Input } from './components/ui/input';
 
 export type Option = {
   value: string;
@@ -58,6 +59,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [optionSelected, setOptionSelected] = useState<boolean>();
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  const [link, setLink] = useState('');
 
   const selectOption = (option: Option, productList: Product[] = products) => {
     setOptionSelected(option.bought);
@@ -147,6 +149,37 @@ export default function App() {
   //   input?.focus();
   // };
 
+  const search = async () => {
+    const response = await extrairPeca(link);
+    console.log(response);
+  };
+
+  async function extrairPeca(link) {
+    const r = await fetch(
+      '/.netlify/functions/extrair?url=' + encodeURIComponent(link),
+    );
+    const d = await r.json();
+
+    if (d.erro) {
+      // fallback: abre o formulário manual já com o que deu pra pegar
+      return { manual: true, link, loja: d.loja, motivo: d.erro };
+    }
+
+    return {
+      id: crypto.randomUUID(),
+      nome: d.nome,
+      marca: d.marca,
+      preco: d.preco,
+      precoDe: d.precoDe,
+      imagem: d.imagem,
+      loja: d.loja,
+      link: d.link,
+      disponivel: d.disponivel,
+      adicionadoEm: new Date().toISOString(),
+      verificadoEm: new Date().toISOString(),
+    };
+  }
+
   return isLoading ? (
     <div className="flex items-center justify-center w-screen h-screen">
       <Spinner className="text-primary" />
@@ -233,16 +266,21 @@ export default function App() {
 
       <hr className="mt-8 mb-8" />
 
-      {/* <div className="flex gap-3 items-center mb-6">
-        <Input id="link" name="link" placeholder="Cole o link da peça aqui" />
+      <div className="flex gap-3 items-center mb-6">
+        <Input
+          id="link"
+          name="link"
+          placeholder="Cole o link da peça aqui"
+          onChange={(value) => setLink(value.target.value)}
+        />
         <Button
           size="lg"
           className="bg-red-700 hover:bg-red-800"
-          onClick={() => focusInput()}
+          onClick={() => search()}
         >
           Adicionar
         </Button>
-      </div> */}
+      </div>
 
       <div>
         {productsView?.length > 0 ? (

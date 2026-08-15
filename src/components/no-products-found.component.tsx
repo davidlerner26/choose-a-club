@@ -8,6 +8,13 @@ export default function NoProductsFound() {
       <p className="max-w-sm text-muted-foreground">
         Viu uma peça que amou? É só clicar em Adicionar Produto
       </p>
+      {/* <Button
+        size="lg"
+        className="bg-red-700 hover:bg-red-800"
+        onClick={() => focusInput()}
+      >
+        Colar o primeiro link
+      </Button> */}
     </div>
   );
 }
