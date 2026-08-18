@@ -17,6 +17,13 @@ export default function Products({
   setId,
   setOpen,
   productsView,
+}: {
+  priceWithCurrency: (price: number) => string;
+  updateProducts: () => Promise<void>;
+  setIsLoading: (isLoading: boolean) => void;
+  setId: (id: string) => void;
+  setOpen: (open: boolean) => void;
+  productsView: Product[];
 }) {
   const firstLetterUppercase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();

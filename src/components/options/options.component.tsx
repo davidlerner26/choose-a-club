@@ -1,7 +1,13 @@
 import { Button } from '@/components/ui/button';
 import type { Option } from '@/types';
 
-export default function Options({ selectOption, optionSelected }) {
+export default function Options({
+  selectOption,
+  optionSelected,
+}: {
+  selectOption: (bought: boolean) => void;
+  optionSelected: boolean | undefined;
+}) {
   const options: Option[] = [
     { value: 'Desejando', selected: false, bought: false },
     { value: 'Já comprei', selected: false, bought: true },
@@ -13,7 +19,7 @@ export default function Options({ selectOption, optionSelected }) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => selectOption(option)}
+          onClick={() => selectOption(option.bought)}
           key={option.value}
           className={
             option.bought === optionSelected

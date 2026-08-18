@@ -4,7 +4,7 @@ import AddProductDialog from './components/add-product-dialog/add-product-dialog
 import { Button } from '@/components/ui/button';
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import './App.css';
-import { createProduct, getAllProducts } from './firebase/firebase';
+import { getAllProducts } from './firebase/firebase';
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
 import Categories from './components/categories/categories.component';

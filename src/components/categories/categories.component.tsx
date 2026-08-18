@@ -4,6 +4,10 @@ export default function Categories({
   selectedCategory,
   selectCategory,
   categories,
+}: {
+  selectedCategory: string;
+  selectCategory: (category: string) => void;
+  categories: string[];
 }) {
   return (
     <div className="flex flex-wrap gap-2">
