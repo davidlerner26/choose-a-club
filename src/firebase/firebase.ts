@@ -10,6 +10,12 @@ import {
   doc,
   updateDoc,
 } from 'firebase/firestore';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth';
 import type { Product } from '@/types';
 
 // Your web app's Firebase configuration
@@ -26,6 +32,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
+
+// Auth
+export const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+export async function signInWithGoogle() {
+  return await signInWithPopup(auth, googleProvider);
+}
+
+export async function signOutUser() {
+  return await signOut(auth);
+}
 
 // Products
 const products = collection(db, 'products');

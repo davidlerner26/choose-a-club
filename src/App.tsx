@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import Categories from './components/categories/categories.component';
 import Options from './components/options/options.component';
 import Products from './components/products/products.component';
+import UserMenu from './components/user-menu/user-menu.component';
 
 export default function App() {
   const categories = [
@@ -144,11 +145,14 @@ export default function App() {
   ) : (
     <main className="m-auto max-w-6xl mt-8 px-4 pb-16">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-6 border-b">
-        <div className="flex items-center gap-2.5">
-          <img className="w-10" src="favicon.svg" />
-          <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
-            The Bambina's Club
-          </h1>
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <img className="w-10" src="favicon.svg" />
+            <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
+              The Bambina's Club
+            </h1>
+          </div>
+          <UserMenu />
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex flex-col items-end rounded-lg bg-accent px-4 py-2 self-start sm:self-auto">
