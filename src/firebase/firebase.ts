@@ -8,11 +8,15 @@ import {
   collection,
   deleteDoc,
   doc,
+  query,
   updateDoc,
+  where,
 } from 'firebase/firestore';
 import {
+  createUserWithEmailAndPassword,
   getAuth,
   GoogleAuthProvider,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
 } from 'firebase/auth';
@@ -41,6 +45,14 @@ export async function signInWithGoogle() {
   return await signInWithPopup(auth, googleProvider);
 }
 
+export async function signInWithEmail(email: string, password: string) {
+  return await signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function signUpWithEmail(email: string, password: string) {
+  return await createUserWithEmailAndPassword(auth, email, password);
+}
+
 export async function signOutUser() {
   return await signOut(auth);
 }
@@ -49,7 +61,10 @@ export async function signOutUser() {
 const products = collection(db, 'products');
 
 export async function getAllProducts(): Promise<Product[]> {
-  const snapshot = await getDocs(products);
+  const userId = auth.currentUser?.uid;
+  if (!userId) return [];
+
+  const snapshot = await getDocs(query(products, where('userId', '==', userId)));
 
   return snapshot.docs.map((doc) => ({
     id: doc.id,
@@ -58,7 +73,10 @@ export async function getAllProducts(): Promise<Product[]> {
 }
 
 export async function createProduct(product: Product) {
-  return await addDoc(products, product);
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error('Usuário não autenticado');
+
+  return await addDoc(products, { ...product, userId });
 }
 
 export async function updateProduct(id: string, product: Partial<Product>) {
@@ -76,8 +94,11 @@ export async function getProduct(id: string): Promise<Product | null> {
     return null;
   }
 
-  return {
-    id: snapshot.id,
-    ...snapshot.data(),
-  } as Product;
+  const product = { id: snapshot.id, ...snapshot.data() } as Product;
+
+  if (product.userId !== auth.currentUser?.uid) {
+    return null;
+  }
+
+  return product;
 }

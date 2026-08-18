@@ -7,6 +7,7 @@ export type Product = {
   store: string;
   url: string;
   bought?: boolean;
+  userId?: string;
 };
 
 export type Option = {

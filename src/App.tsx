@@ -11,6 +11,8 @@ import Categories from './components/categories/categories.component';
 import Options from './components/options/options.component';
 import Products from './components/products/products.component';
 import UserMenu from './components/user-menu/user-menu.component';
+import LoginPage from './components/login-page/login-page.component';
+import { useAuth } from './hooks/use-auth';
 
 export default function App() {
   const categories = [
@@ -30,6 +32,8 @@ export default function App() {
     'Roupas de verão',
     'Roupas de festa',
   ];
+
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   const [open, setOpen] = useState<boolean>(false);
   const [id, setId] = useState<string | null>(null);
@@ -60,11 +64,12 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (!user) return;
     async function fetchProducts() {
       await updateProducts();
     }
     fetchProducts();
-  }, []);
+  }, [user]);
 
   const selectCategory = (category: string) => {
     if (category === selectedCategory) return;
@@ -138,6 +143,18 @@ export default function App() {
     };
   }
 
+  if (isAuthLoading) {
+    return (
+      <div className="flex items-center justify-center w-screen h-screen">
+        <Spinner className="text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
+
   return isLoading ? (
     <div className="flex items-center justify-center w-screen h-screen">
       <Spinner className="text-primary" />
@@ -152,7 +169,6 @@ export default function App() {
               The Bambina's Club
             </h1>
           </div>
-          <UserMenu />
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex flex-col items-end rounded-lg bg-accent px-4 py-2 self-start sm:self-auto">
@@ -189,6 +205,7 @@ export default function App() {
                 product={product}
               />
             )}
+            <UserMenu />
           </div>
         </div>
       </div>
