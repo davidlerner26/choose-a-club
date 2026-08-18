@@ -45,6 +45,7 @@ export default function AddProductDialog({
   id,
   setId,
   updateProducts,
+  product,
 }: {
   categories: string[];
   open: boolean;
@@ -52,6 +53,7 @@ export default function AddProductDialog({
   id: string | null;
   setId: (id: string | null) => void;
   updateProducts: () => Promise<void>;
+  product?: Product;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [priceDisplay, setPriceDisplay] = useState<string>('0,00');
@@ -103,7 +105,9 @@ export default function AddProductDialog({
 
   useEffect(() => {
     async function fetchProduct() {
-      if (id) {
+      if (product) {
+        setFieldsDefaultValues(product);
+      } else if (id) {
         setIsLoading(true);
         const response = await getProduct(id);
         if (response) {
@@ -113,7 +117,7 @@ export default function AddProductDialog({
       setIsLoading(false);
     }
     fetchProduct();
-  }, [id]);
+  }, [id, product]);
 
   return (
     <Dialog open={open} onOpenChange={resetFields}>

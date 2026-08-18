@@ -69,8 +69,147 @@ function absolutizar(src, base) {
   }
 }
 
+// ---------- categorias ----------
+// Cada loja nomeia do seu jeito ("Vestido", "Vestidos", "Dresses"), e ainda
+// mistura categoria comercial ("bazar farm"). Aqui traduzimos para as abas do site.
+const REGRAS_CATEGORIA = [
+  ['Vestidos', ['vestido', 'chemise', 'tubinho']],
+  ['Saias', ['saia']],
+  [
+    'Calcas',
+    [
+      'calca',
+      'jeans',
+      'short',
+      'bermuda',
+      'legging',
+      'pantalona',
+      'pantacourt',
+    ],
+  ],
+  [
+    'Casacos',
+    [
+      'casaco',
+      'jaqueta',
+      'blazer',
+      'cardiga',
+      'sobretudo',
+      'parka',
+      'trench',
+      'colete',
+      'kimono',
+    ],
+  ],
+  [
+    'Blusas',
+    [
+      'blusa',
+      'camisa',
+      'camiseta',
+      'cropped',
+      'regata',
+      'body',
+      'moletom',
+      'trico',
+      'sueter',
+      'tops?\\b',
+    ],
+  ],
+  [
+    'Sapatos',
+    [
+      'sapato',
+      'tenis',
+      'sandalia',
+      'bota',
+      'rasteira',
+      'mule',
+      'chinelo',
+      'sapatilha',
+      'calcado',
+      'salto',
+    ],
+  ],
+  [
+    'Bolsas',
+    ['bolsa', 'mochila', 'clutch', 'carteira', 'necessaire', 'pochete'],
+  ],
+  [
+    'Acessorios',
+    [
+      'acessorio',
+      'colar',
+      'brinco',
+      'anel',
+      'pulseira',
+      'cinto',
+      'lenco',
+      'chapeu',
+      'oculos',
+      'bijou',
+      'echarpe',
+      'presilha',
+      'meia',
+    ],
+  ],
+  ['Perucas', ['peruca', 'aplique', 'cabelo']],
+  ['Brinquedos', ['brinquedo', 'pelucia', 'boneca']],
+  ['Jogos', ['jogo', 'quebra-cabeca', 'tabuleiro']],
+];
+
+// nomes com acento, como aparecem nas abas do site
+const ROTULOS = { Calcas: 'Calças', Acessorios: 'Acessórios' };
+
+function semAcento(s) {
+  return String(s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+// pega o nível mais específico do caminho de categorias da loja
+function categoriaBruta(caminhos) {
+  if (!Array.isArray(caminhos) || !caminhos.length) return null;
+  const maisFundo = caminhos
+    .map((c) => String(c).split('/').filter(Boolean))
+    .sort((a, b) => b.length - a.length)[0];
+  return maisFundo && maisFundo.length ? maisFundo[maisFundo.length - 1] : null;
+}
+
+// classifica pela categoria da loja; se não bater, tenta pelo nome do produto
+function classificar(...textos) {
+  for (const texto of textos) {
+    const t = semAcento(texto);
+    if (!t) continue;
+    for (const [destino, chaves] of REGRAS_CATEGORIA) {
+      if (chaves.some((k) => new RegExp('\\b' + k).test(t))) {
+        return ROTULOS[destino] || destino;
+      }
+    }
+  }
+  return 'Outros';
+}
+
 // ---------- 1) VTEX ----------
 // URL de produto VTEX termina em /{slug}/p
+// escolhe o seller com estoque; senão o padrão da loja
+function escolherOferta(item) {
+  const sellers = (item && item.sellers) || [];
+  const comEstoque = sellers.find(
+    (s) => ((s.commertialOffer || {}).AvailableQuantity || 0) > 0,
+  );
+  const escolhido =
+    comEstoque || sellers.find((s) => s.sellerDefault) || sellers[0] || {};
+  return escolhido.commertialOffer || {};
+}
+
+// nome da variação do item (tamanho, na maioria das lojas de roupa)
+function variacao(item) {
+  const chave = ((item || {}).variations || [])[0];
+  return chave ? (item[chave] || [])[0] || null : null;
+}
+
 async function tentarVtex(alvo) {
   const u = new URL(alvo);
   const partes = u.pathname.split('/').filter(Boolean);
@@ -98,19 +237,50 @@ async function tentarVtex(alvo) {
   if (!Array.isArray(dados) || !dados.length) return null;
 
   const p = dados[0];
-  const item = (p.items || [])[0] || {};
-  const oferta = ((item.sellers || [])[0] || {}).commertialOffer || {};
+  const itens = p.items || [];
+
+  // ATENÇÃO: em loja de roupa os "items" são TAMANHOS, não cores.
+  // items[0] costuma ser o menor tamanho — e frequentemente o que esgotou primeiro.
+  const skuAlvo =
+    u.searchParams.get('idsku') ||
+    u.searchParams.get('skuId') ||
+    u.searchParams.get('sku');
+
+  const comEstoque = itens.filter(
+    (i) => (escolherOferta(i).AvailableQuantity || 0) > 0,
+  );
+
+  // 1) o tamanho exato do link; 2) qualquer um com estoque; 3) o primeiro
+  const item =
+    (skuAlvo && itens.find((i) => String(i.itemId) === String(skuAlvo))) ||
+    comEstoque[0] ||
+    itens[0] ||
+    {};
+
+  let oferta = escolherOferta(item);
+  // se o tamanho escolhido não tem preço, pega o preço de qualquer outro
+  if (!oferta.Price) {
+    const comPreco = itens.map(escolherOferta).find((o) => o.Price);
+    if (comPreco) oferta = comPreco;
+  }
+
   const imagem = ((item.images || [])[0] || {}).imageUrl || null;
+  const bruta = categoriaBruta(p.categories);
 
   return {
     nome: p.productName || null,
     marca: p.brand || null,
+    categoria: classificar(bruta, p.productName),
+    categoriaLoja: bruta,
     preco: parsePreco(oferta.Price),
     precoDe: parsePreco(oferta.ListPrice),
     imagem: imagem
-      ? imagem.replace(/(\/ids\/\d+)(-[^/]*)?/, '$1-800-1200')
+      ? imagem.replace(/(\/ids\/\d+)(-[^/?]*)?/, '$1-800-1200')
       : null,
-    disponivel: (oferta.AvailableQuantity || 0) > 0,
+    // disponibilidade do PRODUTO: basta um tamanho com estoque
+    disponivel: comEstoque.length > 0,
+    tamanho: skuAlvo ? variacao(item) : null,
+    tamanhosDisponiveis: comEstoque.map(variacao).filter(Boolean),
     fonte: 'vtex',
   };
 }
@@ -162,6 +332,8 @@ function lerJsonLd(html, base) {
     return {
       nome: typeof p.name === 'string' ? p.name : null,
       marca: typeof p.brand === 'string' ? p.brand : p.brand?.name || null,
+      categoria: classificar(p.category, p.name),
+      categoriaLoja: typeof p.category === 'string' ? p.category : null,
       preco: parsePreco(ofertas.price ?? ofertas.lowPrice),
       precoDe: null,
       imagem: absolutizar(img, base),
@@ -207,6 +379,8 @@ function lerMetas(html, base) {
   return {
     nome: titulo ? titulo.replace(/\s+/g, ' ').trim() : null,
     marca: metas['og:site_name'] || null,
+    categoria: classificar(metas['product:category'], titulo),
+    categoriaLoja: metas['product:category'] || null,
     preco: parsePreco(preco),
     precoDe: null,
     imagem: absolutizar(img, base),

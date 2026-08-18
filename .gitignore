@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Netlify folder
+netlify/blobs-serve
+netlify/db
+netlify/v1
+netlify/functions-internal
+netlify/state.json
+.netlify

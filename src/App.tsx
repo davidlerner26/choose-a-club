@@ -4,7 +4,7 @@ import AddProductDialog from './components/add-product-dialog/add-product-dialog
 import { Button } from '@/components/ui/button';
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import './App.css';
-import { getAllProducts } from './firebase/firebase';
+import { createProduct, getAllProducts } from './firebase/firebase';
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
 import Categories from './components/categories/categories.component';
@@ -38,6 +38,7 @@ export default function App() {
   const [optionSelected, setOptionSelected] = useState<boolean>();
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
   const [link, setLink] = useState('');
+  const [product, setProduct] = useState<Product>();
 
   const selectOption = (bought: boolean, productList: Product[] = products) => {
     setOptionSelected(bought);
@@ -88,8 +89,22 @@ export default function App() {
 
   const search = async () => {
     if (link) {
+      setIsLoading(true);
       const response = await extrairPeca(link);
-      console.log(response);
+      if (response) {
+        const product: Product = {
+          id: crypto.randomUUID(),
+          name: response.name,
+          store: response.marca,
+          price: response.price,
+          url: response.imagem,
+          link: response.link,
+          category: response.categoria,
+        };
+        setProduct(product);
+        setOpen(true);
+      }
+      setIsLoading(false);
     } else {
       focusInput();
     }
@@ -118,6 +133,7 @@ export default function App() {
       disponivel: d.disponivel,
       adicionadoEm: new Date().toISOString(),
       verificadoEm: new Date().toISOString(),
+      categoria: d.categoria,
     };
   }
 
@@ -166,6 +182,7 @@ export default function App() {
                 id={id}
                 setId={setId}
                 updateProducts={updateProducts}
+                product={product}
               />
             )}
           </div>
