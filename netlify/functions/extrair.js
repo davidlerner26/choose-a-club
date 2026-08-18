@@ -389,7 +389,7 @@ function lerMetas(html, base) {
   };
 }
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return json({ ok: true });
 
   let alvo = (event.queryStringParameters || {}).url;
