@@ -47,6 +47,7 @@ export default function AddProductDialog({
   setId,
   updateProducts,
   product,
+  selectedCategory,
 }: {
   categories: string[];
   open: boolean;
@@ -55,6 +56,7 @@ export default function AddProductDialog({
   setId: (id: string | null) => void;
   updateProducts: () => Promise<void>;
   product?: Product;
+  selectedCategory?: string;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [priceDisplay, setPriceDisplay] = useState<string>('0,00');
@@ -116,6 +118,8 @@ export default function AddProductDialog({
         if (response) {
           setFieldsDefaultValues(response);
         }
+      } else if (selectedCategory && selectedCategory !== 'Tudo') {
+        setValue('category', selectedCategory);
       }
       setIsLoading(false);
     }

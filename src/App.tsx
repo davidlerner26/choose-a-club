@@ -172,6 +172,7 @@ export default function App() {
                 setId={setId}
                 updateProducts={updateProducts}
                 product={product}
+                selectedCategory={selectedCategory}
               />
             )}
             <UserMenu />
