@@ -52,6 +52,7 @@ export default function AddProductDialog({
   setId,
   updateProducts,
   product,
+  setProduct,
   selectedCategory,
 }: {
   categories: string[];
@@ -61,6 +62,7 @@ export default function AddProductDialog({
   setId: (id: string | null) => void;
   updateProducts: () => Promise<void>;
   product?: Product;
+  setProduct?: (product: Product | undefined) => void;
   selectedCategory?: string;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -97,6 +99,7 @@ export default function AddProductDialog({
     setOpen(open);
     if (!open) {
       setId(null);
+      setProduct?.(undefined);
       reset();
       setPriceDisplay('0,00');
     }
