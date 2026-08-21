@@ -16,7 +16,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-import { Controller, useForm, type SubmitHandler } from 'react-hook-form';
+import {
+  Controller,
+  useForm,
+  useWatch,
+  type SubmitHandler,
+} from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -70,6 +75,8 @@ export default function AddProductDialog({
     getValues,
     setValue,
   } = useForm<Product>();
+
+  const imageUrl = useWatch({ control, name: 'url' });
 
   const onSubmit: SubmitHandler<Product> = async (data) => {
     const product: Product = {
@@ -130,7 +137,7 @@ export default function AddProductDialog({
     <Dialog open={open} onOpenChange={resetFields}>
       <DialogContent className="sm:max-w-sm">
         {isLoading ? (
-          <div className="flex items-center justify-center w-screen h-screen">
+          <div className="flex items-center justify-center">
             <Spinner />
           </div>
         ) : (
@@ -248,6 +255,13 @@ export default function AddProductDialog({
                   })}
                 />
                 <FieldError>{errors.url?.message}</FieldError>
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt="Pré-visualização da imagem"
+                    className="mt-2 h-40 w-full rounded-md object-cover"
+                  />
+                )}
               </Field>
             </FieldGroup>
             <DialogFooter>
