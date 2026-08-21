@@ -8,7 +8,10 @@ export type Product = {
   url: string;
   bought?: boolean;
   userId?: string;
+  createdAt?: number;
 };
+
+export type SortOption = 'recent' | 'price-asc' | 'price-desc';
 
 export type Option = {
   value: string;

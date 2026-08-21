@@ -30,6 +30,7 @@ import type { Product } from '@/types';
 import { createProduct, getProduct, updateProduct } from '@/firebase/firebase';
 import { useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
+import LinkField from '../link-field/link-field.component';
 
 function formatCentsToPtBr(cents: number): string {
   return (cents / 100).toLocaleString('pt-BR', {
@@ -64,6 +65,8 @@ export default function AddProductDialog({
     control,
     formState: { errors },
     reset,
+    getValues,
+    setValue,
   } = useForm<Product>();
 
   const onSubmit: SubmitHandler<Product> = async (data) => {
@@ -131,21 +134,29 @@ export default function AddProductDialog({
             <DialogHeader>
               <DialogTitle>Nova peça</DialogTitle>
               <DialogDescription className="mb-4">
-                Cole o link e aguarde: o app busca nome, preço e foto sozinho.
+                Cole o link, clique em Adicionar e aguarde: buscamos as
+                informações do produto automaticamente.
               </DialogDescription>
             </DialogHeader>
             <FieldGroup className="mb-8">
-              <Field>
-                <Label htmlFor="link">Link da loja</Label>
-                <Input
-                  id="link"
-                  placeholder="https://loja.com.br/vestido..."
-                  {...register('link', {
-                    required: 'Link da loja é obrigatório',
-                  })}
-                />
-                <FieldError>{errors.link?.message}</FieldError>
-              </Field>
+              <LinkField
+                register={register}
+                errors={errors}
+                getValues={getValues}
+                setIsLoading={setIsLoading}
+                placeholder="https://loja.com.br/vestido..."
+                onProductFetched={(product) => {
+                  setValue('name', product.name);
+                  setValue('price', product.price);
+                  setPriceDisplay(
+                    formatCentsToPtBr(Math.round(product.price * 100)),
+                  );
+                  setValue('category', product.category);
+                  setValue('store', product.store);
+                  setValue('url', product.url);
+                }}
+                displayLabel={true}
+              />
               <Field>
                 <Label htmlFor="name">Nome da peça</Label>
                 <Input

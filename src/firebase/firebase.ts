@@ -76,7 +76,11 @@ export async function createProduct(product: Product) {
   const userId = auth.currentUser?.uid;
   if (!userId) throw new Error('Usuário não autenticado');
 
-  return await addDoc(products, { ...product, userId });
+  return await addDoc(products, {
+    ...product,
+    userId,
+    createdAt: Date.now(),
+  });
 }
 
 export async function updateProduct(id: string, product: Partial<Product>) {
