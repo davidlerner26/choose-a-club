@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "netlify dev",
+    "dev:vite": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -21,6 +22,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.84.0",
+    "react-router-dom": "^7.18.2",
     "shadcn": "^4.16.1",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3",

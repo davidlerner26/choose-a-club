@@ -9,6 +9,7 @@ import {
   deleteDoc,
   doc,
   query,
+  runTransaction,
   updateDoc,
   where,
 } from 'firebase/firestore';
@@ -20,7 +21,7 @@ import {
   signInWithPopup,
   signOut,
 } from 'firebase/auth';
-import type { Category, Product } from '@/types';
+import type { Category, Comment, Product, UserProfile } from '@/types';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -60,10 +61,7 @@ export async function signOutUser() {
 // Products
 const products = collection(db, 'products');
 
-export async function getAllProducts(): Promise<Product[]> {
-  const userId = auth.currentUser?.uid;
-  if (!userId) return [];
-
+export async function getAllProducts(userId: string): Promise<Product[]> {
   const snapshot = await getDocs(query(products, where('userId', '==', userId)));
 
   return snapshot.docs.map((doc) => ({
@@ -110,10 +108,7 @@ export async function getProduct(id: string): Promise<Product | null> {
 // Categories
 const categories = collection(db, 'categories');
 
-export async function getUserCategories(): Promise<Category[]> {
-  const userId = auth.currentUser?.uid;
-  if (!userId) return [];
-
+export async function getUserCategories(userId: string): Promise<Category[]> {
   const snapshot = await getDocs(
     query(categories, where('userId', '==', userId)),
   );
@@ -132,4 +127,114 @@ export async function createCategory(name: string): Promise<Category> {
   const docRef = await addDoc(categories, { name, userId, createdAt });
 
   return { id: docRef.id, name, userId, createdAt };
+}
+
+// User profiles & usernames
+const users = collection(db, 'users');
+const usernames = collection(db, 'usernames');
+
+export async function isUsernameAvailable(username: string): Promise<boolean> {
+  const snapshot = await getDoc(doc(usernames, username));
+  return !snapshot.exists();
+}
+
+export async function createUserProfile({
+  username,
+  displayName,
+  photoURL,
+}: {
+  username: string;
+  displayName: string;
+  photoURL?: string | null;
+}): Promise<UserProfile> {
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error('Usuário não autenticado');
+
+  const usernameRef = doc(usernames, username);
+  const userRef = doc(users, uid);
+  const createdAt = Date.now();
+
+  await runTransaction(db, async (transaction) => {
+    const usernameSnapshot = await transaction.get(usernameRef);
+    if (usernameSnapshot.exists()) {
+      throw new Error('Este nome de usuário já está em uso.');
+    }
+    transaction.set(usernameRef, { uid });
+    transaction.set(userRef, {
+      uid,
+      username,
+      displayName,
+      photoURL: photoURL ?? null,
+      createdAt,
+    });
+  });
+
+  return { uid, username, displayName, photoURL: photoURL ?? undefined, createdAt };
+}
+
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+  const snapshot = await getDoc(doc(users, uid));
+  if (!snapshot.exists()) return null;
+  return snapshot.data() as UserProfile;
+}
+
+export async function getUserByUsername(
+  username: string,
+): Promise<UserProfile | null> {
+  const usernameSnapshot = await getDoc(doc(usernames, username));
+  if (!usernameSnapshot.exists()) return null;
+
+  const { uid } = usernameSnapshot.data() as { uid: string };
+  return await getUserProfile(uid);
+}
+
+// Comments
+const comments = collection(db, 'comments');
+
+export async function getProductComments(productId: string): Promise<Comment[]> {
+  const snapshot = await getDocs(
+    query(comments, where('productId', '==', productId)),
+  );
+
+  const results = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Comment[];
+
+  return results.sort((a, b) => a.createdAt - b.createdAt);
+}
+
+export async function addComment({
+  productId,
+  profileUserId,
+  text,
+}: {
+  productId: string;
+  profileUserId: string;
+  text: string;
+}): Promise<Comment> {
+  const authorId = auth.currentUser?.uid;
+  if (!authorId) throw new Error('Usuário não autenticado');
+
+  const createdAt = Date.now();
+  const comment = {
+    productId,
+    profileUserId,
+    authorId,
+    authorName: auth.currentUser?.displayName ?? 'Usuário',
+    authorPhotoURL: auth.currentUser?.photoURL ?? null,
+    text,
+    createdAt,
+  };
+  const docRef = await addDoc(comments, comment);
+
+  return {
+    id: docRef.id,
+    ...comment,
+    authorPhotoURL: comment.authorPhotoURL ?? undefined,
+  };
+}
+
+export async function deleteComment(id: string) {
+  return await deleteDoc(doc(db, 'comments', id));
 }

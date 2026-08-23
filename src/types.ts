@@ -26,3 +26,22 @@ export type Option = {
   selected: boolean;
   bought: boolean;
 };
+
+export type UserProfile = {
+  uid: string;
+  username: string;
+  displayName: string;
+  photoURL?: string;
+  createdAt?: number;
+};
+
+export type Comment = {
+  id: string;
+  productId: string;
+  profileUserId: string;
+  authorId: string;
+  authorName: string;
+  authorPhotoURL?: string;
+  text: string;
+  createdAt: number;
+};

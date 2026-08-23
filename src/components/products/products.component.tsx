@@ -1,3 +1,4 @@
+import type { User } from 'firebase/auth';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import NoProductsFound from '../no-products-found/no-products-found.component';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import {
 } from '@tabler/icons-react';
 import { deleteProduct, updateProduct } from '@/firebase/firebase';
 import type { Product } from '@/types';
+import Comments from '../comments/comments.component';
 
 export default function Products({
   priceWithCurrency,
@@ -17,6 +19,9 @@ export default function Products({
   setId,
   setOpen,
   productsView,
+  isOwner,
+  profileUserId,
+  currentUser,
 }: {
   priceWithCurrency: (price: number) => string;
   updateProducts: () => Promise<void>;
@@ -24,6 +29,9 @@ export default function Products({
   setId: (id: string) => void;
   setOpen: (open: boolean) => void;
   productsView: Product[];
+  isOwner: boolean;
+  profileUserId: string;
+  currentUser: User | null;
 }) {
   const firstLetterUppercase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -102,7 +110,7 @@ export default function Products({
                           <IconExternalLink stroke={2} />
                         </a>
                       </div>
-                      {!bought && (
+                      {isOwner && !bought && (
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
@@ -139,6 +147,11 @@ export default function Products({
                       )}
                     </div>
                   </CardFooter>
+                  <Comments
+                    productId={id}
+                    profileUserId={profileUserId}
+                    currentUser={currentUser}
+                  />
                 </Card>
               </li>
             ),
