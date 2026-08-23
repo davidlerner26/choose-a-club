@@ -65,25 +65,20 @@ export default function ChooseUsernameDialog({
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <img className="w-14" src="favicon.svg" />
           <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
-            Escolha seu nome de usuário
+            Escolha o nome do seu clube
           </h1>
-          <p className="text-muted-foreground">
-            Ele vai identificar seu perfil público, ex.: choosea.club/
-            {'{seu-usuario}'}
-          </p>
         </div>
 
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
-                <Label htmlFor="username">Nome de usuário</Label>
+                <Label htmlFor="username">Nome do clube</Label>
                 <Input
                   id="username"
-                  placeholder="isadora"
                   autoFocus
                   {...register('username', {
-                    required: 'Nome de usuário é obrigatório',
+                    required: 'Nome do clube é obrigatório',
                   })}
                 />
                 <FieldError>{errors.username?.message}</FieldError>
