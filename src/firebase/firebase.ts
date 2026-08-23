@@ -20,7 +20,7 @@ import {
   signInWithPopup,
   signOut,
 } from 'firebase/auth';
-import type { Product } from '@/types';
+import type { Category, Product } from '@/types';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -105,4 +105,31 @@ export async function getProduct(id: string): Promise<Product | null> {
   }
 
   return product;
+}
+
+// Categories
+const categories = collection(db, 'categories');
+
+export async function getUserCategories(): Promise<Category[]> {
+  const userId = auth.currentUser?.uid;
+  if (!userId) return [];
+
+  const snapshot = await getDocs(
+    query(categories, where('userId', '==', userId)),
+  );
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Category[];
+}
+
+export async function createCategory(name: string): Promise<Category> {
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error('Usuário não autenticado');
+
+  const createdAt = Date.now();
+  const docRef = await addDoc(categories, { name, userId, createdAt });
+
+  return { id: docRef.id, name, userId, createdAt };
 }

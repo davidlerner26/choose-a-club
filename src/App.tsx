@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { Product, SortOption } from './types';
+import type { Category, Product, SortOption } from './types';
 import AddProductDialog from './components/add-product-dialog/add-product-dialog.component';
 import { Button } from '@/components/ui/button';
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import './App.css';
-import { getAllProducts } from './firebase/firebase';
+import {
+  createCategory,
+  getAllProducts,
+  getUserCategories,
+} from './firebase/firebase';
 import { Spinner } from '@/components/ui/spinner';
 import Categories from './components/categories/categories.component';
 import Options from './components/options/options.component';
@@ -17,36 +21,26 @@ import LinkField from './components/link-field/link-field.component';
 import SearchField from './components/search-field/search-field.component';
 import SortSelect from './components/sort-select/sort-select.component';
 
-export default function App() {
-  const categories = [
-    'Tudo',
-    'Blusas',
-    'Calças',
-    'Vestidos',
-    'Saias',
-    'Casacos',
-    'Sapatos',
-    'Bolsas',
-    'Acessórios',
-    'Brinquedos',
-    'Jogos',
-    'Perucas',
-    'Outros',
-    'Roupas de verão',
-    'Roupas de festa',
-  ];
+const TUDO = 'Tudo';
 
+export default function App() {
   const { user, isLoading: isAuthLoading } = useAuth();
 
   const [open, setOpen] = useState<boolean>(false);
   const [id, setId] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [optionSelected, setOptionSelected] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  const [selectedCategory, setSelectedCategory] = useState<string>(TUDO);
   const [product, setProduct] = useState<Product>();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+
+  const categoryNames = useMemo(
+    () => categories.map((category) => category.name),
+    [categories],
+  );
 
   const {
     register: registerLink,
@@ -73,12 +67,23 @@ export default function App() {
     setIsLoading(false);
   };
 
+  const addCategory = async (name: string) => {
+    const newCategory = await createCategory(name);
+    setCategories((prev) => [...prev, newCategory]);
+    return newCategory;
+  };
+
   useEffect(() => {
     if (!user) return;
     async function fetchProducts() {
       await updateProducts();
     }
+    async function fetchCategories() {
+      const response = await getUserCategories();
+      setCategories(response);
+    }
     fetchProducts();
+    fetchCategories();
   }, [user]);
 
   const productsView = useMemo(() => {
@@ -86,7 +91,7 @@ export default function App() {
 
     const filtered = products.filter((product) => {
       if (product.bought !== optionSelected) return false;
-      if (selectedCategory !== 'Tudo' && product.category !== selectedCategory)
+      if (selectedCategory !== TUDO && product.category !== selectedCategory)
         return false;
       if (query && !product.name.toLowerCase().includes(query)) return false;
       return true;
@@ -135,7 +140,7 @@ export default function App() {
           <div className="flex items-center gap-2.5">
             <img className="w-10" src="favicon.svg" />
             <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
-              The Bambina's Club
+              Choose a Club
             </h1>
           </div>
         </div>
@@ -165,7 +170,8 @@ export default function App() {
             </Button>
             {open && (
               <AddProductDialog
-                categories={categories}
+                categories={categoryNames}
+                onAddCategory={addCategory}
                 open={open}
                 setOpen={setOpen}
                 id={id}
@@ -185,7 +191,9 @@ export default function App() {
         <Categories
           selectedCategory={selectedCategory}
           selectCategory={selectCategory}
-          categories={categories}
+          categories={
+            categoryNames.length ? [TUDO, ...categoryNames] : categoryNames
+          }
         />
 
         <Options selectOption={selectOption} optionSelected={optionSelected} />

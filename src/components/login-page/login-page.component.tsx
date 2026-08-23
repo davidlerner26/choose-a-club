@@ -117,11 +117,11 @@ export default function LoginPage() {
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <img className="w-14" src="favicon.svg" />
           <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
-            The Bambina's Club
+            Choose a Club
           </h1>
           <p className="text-muted-foreground">
-            Guarde as peças que você ama e nunca perca de vista o que deseja
-            comprar.
+            Guarde os produtos que você ama e nunca perca de vista o que deseja
+            comprar
           </p>
         </div>
 

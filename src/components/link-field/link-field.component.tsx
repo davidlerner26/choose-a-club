@@ -49,6 +49,7 @@ export default function LinkField({
             url: response.imagem,
             link: response.link,
             category: response.categoria,
+            priceFrom: response.precoDe,
           });
         }
       } catch (error) {

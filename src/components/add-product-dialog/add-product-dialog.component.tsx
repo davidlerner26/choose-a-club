@@ -28,14 +28,18 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Product } from '@/types';
+import type { Category, Product } from '@/types';
 import { createProduct, getProduct, updateProduct } from '@/firebase/firebase';
 import { useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
+import { IconPlus } from '@tabler/icons-react';
 import LinkField from '../link-field/link-field.component';
+
+const NEW_CATEGORY_VALUE = '__new_category__';
 
 function formatCentsToPtBr(cents: number): string {
   return (cents / 100).toLocaleString('pt-BR', {
@@ -46,6 +50,7 @@ function formatCentsToPtBr(cents: number): string {
 
 export default function AddProductDialog({
   categories,
+  onAddCategory,
   open,
   setOpen,
   id,
@@ -56,6 +61,7 @@ export default function AddProductDialog({
   selectedCategory,
 }: {
   categories: string[];
+  onAddCategory: (name: string) => Promise<Category>;
   open: boolean;
   setOpen: (open: boolean) => void;
   id: string | null;
@@ -67,6 +73,9 @@ export default function AddProductDialog({
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [priceDisplay, setPriceDisplay] = useState<string>('0,00');
+  const [isAddingCategory, setIsAddingCategory] = useState<boolean>(false);
+  const [newCategoryName, setNewCategoryName] = useState<string>('');
+  const [isSavingCategory, setIsSavingCategory] = useState<boolean>(false);
 
   const {
     register,
@@ -81,8 +90,17 @@ export default function AddProductDialog({
   const imageUrl = useWatch({ control, name: 'url' });
 
   const onSubmit: SubmitHandler<Product> = async (data) => {
+    const category = data.category.trim();
+    const categoryExists = categories.some(
+      (item) => item.toLowerCase() === category.toLowerCase(),
+    );
+    if (!categoryExists) {
+      await onAddCategory(category);
+    }
+
     const product: Product = {
       ...data,
+      category,
       price: Number(data.price),
       bought: false,
     };
@@ -93,6 +111,28 @@ export default function AddProductDialog({
     }
     resetFields(false);
     await updateProducts();
+  };
+
+  const handleCreateCategory = async () => {
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) return;
+
+    setIsSavingCategory(true);
+    const existing = categories.find(
+      (item) => item.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (!existing) {
+      await onAddCategory(trimmed);
+    }
+    setIsSavingCategory(false);
+    setIsAddingCategory(false);
+    setNewCategoryName('');
+    setValue('category', existing ?? trimmed, { shouldValidate: true });
+  };
+
+  const cancelCreateCategory = () => {
+    setIsAddingCategory(false);
+    setNewCategoryName('');
   };
 
   const resetFields = (open: boolean) => {
@@ -211,27 +251,79 @@ export default function AddProductDialog({
               </Field>
               <Field>
                 <FieldLabel>Categoria</FieldLabel>
-                <Controller
-                  name="category"
-                  control={control}
-                  rules={{ required: 'Categoria é obrigatória' }}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Escolhe uma categoria" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {categories.map((item) => (
-                            <SelectItem key={item} value={item}>
-                              {item}
+                {isAddingCategory ? (
+                  <div className="flex gap-2">
+                    <Input
+                      autoFocus
+                      placeholder="Nome da nova categoria"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleCreateCategory();
+                        }
+                        if (e.key === 'Escape') {
+                          cancelCreateCategory();
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={isSavingCategory || !newCategoryName.trim()}
+                      onClick={handleCreateCategory}
+                    >
+                      {isSavingCategory ? <Spinner /> : 'Adicionar'}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={cancelCreateCategory}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                ) : (
+                  <Controller
+                    name="category"
+                    control={control}
+                    rules={{ required: 'Categoria é obrigatória' }}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={(value) => {
+                          if (value === NEW_CATEGORY_VALUE) {
+                            setIsAddingCategory(true);
+                            return;
+                          }
+                          field.onChange(value);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Escolhe uma categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {categories.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                          <SelectSeparator />
+                          <SelectGroup>
+                            <SelectItem value={NEW_CATEGORY_VALUE}>
+                              <IconPlus className="size-4" />
+                              Adicionar categoria
                             </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                )}
                 <FieldError>{errors?.category?.message}</FieldError>
               </Field>
               <Field>
