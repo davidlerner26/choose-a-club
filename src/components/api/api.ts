@@ -1,6 +1,6 @@
-export const extrairPeca = async (link: string) => {
+export const extractProduct = async (link: string) => {
   const r = await fetch(
-    '/.netlify/functions/extrair?url=' + encodeURIComponent(link),
+    '/.netlify/functions/extract?url=' + encodeURIComponent(link),
   );
 
   const d = await r.json();

@@ -1,4 +1,4 @@
-// netlify/functions/extrair.js
+// netlify/functions/extract.js
 // Recebe ?url=<link do produto> e devolve { nome, preco, precoDe, imagem, marca, loja, disponivel }
 // Estratégia: 1) API pública VTEX (Farm, Animale, Shoulder e boa parte do varejo BR)
 //             2) JSON-LD schema.org/Product

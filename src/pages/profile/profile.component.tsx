@@ -164,7 +164,7 @@ export default function ProfilePage() {
       <Spinner className="text-primary" />
     </div>
   ) : (
-    <main className="m-auto max-w-6xl mt-8 px-4 pb-16">
+    <main className="m-auto max-w-7xl mt-8 px-4 pb-16">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-6 border-b">
         <div className="flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5">
@@ -195,15 +195,15 @@ export default function ProfilePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              onClick={() => updateProducts(profile.uid)}
+            >
+              <IconRefresh data-icon="inline-start" />
+              Atualizar
+            </Button>
             {isOwner && (
               <>
-                <Button
-                  variant="outline"
-                  onClick={() => updateProducts(profile.uid)}
-                >
-                  <IconRefresh data-icon="inline-start" />
-                  Atualizar
-                </Button>
                 <Button size="lg" onClick={() => setOpen(true)}>
                   <IconPlus></IconPlus>
                   Adicionar produto

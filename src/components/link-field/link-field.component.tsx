@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '../ui/button';
 import type { Product } from '@/types';
-import { extrairPeca } from '../api/api';
+import { extractProduct } from '../api/api';
 
 type LinkFieldProps = {
   placeholder: string;
@@ -39,7 +39,7 @@ export default function LinkField({
     if (link) {
       setIsLoading(true);
       try {
-        const response = await extrairPeca(link);
+        const response = await extractProduct(link);
         if (response) {
           onProductFetched({
             id: crypto.randomUUID(),
