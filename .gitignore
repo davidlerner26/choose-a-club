@@ -23,6 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
+# Firebase service account key (used only for one-off migration scripts)
+scripts/serviceAccountKey.json
+
 # Local Netlify folder
 netlify/blobs-serve
 netlify/db

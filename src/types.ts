@@ -8,14 +8,12 @@ export type Product = {
   store: string;
   url: string;
   bought?: boolean;
-  userId?: string;
   createdAt?: number;
 };
 
 export type Category = {
   id: string;
   name: string;
-  userId?: string;
   createdAt?: number;
 };
 

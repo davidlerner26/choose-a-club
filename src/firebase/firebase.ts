@@ -8,8 +8,9 @@ import {
   collection,
   deleteDoc,
   doc,
+  limit,
   query,
-  runTransaction,
+  setDoc,
   updateDoc,
   where,
 } from 'firebase/firestore';
@@ -58,11 +59,16 @@ export async function signOutUser() {
   return await signOut(auth);
 }
 
-// Products
-const products = collection(db, 'products');
+// User profiles
+const users = collection(db, 'users');
+
+// Products (subcollection: users/{uid}/products)
+function productsCollection(uid: string) {
+  return collection(db, 'users', uid, 'products');
+}
 
 export async function getAllProducts(userId: string): Promise<Product[]> {
-  const snapshot = await getDocs(query(products, where('userId', '==', userId)));
+  const snapshot = await getDocs(productsCollection(userId));
 
   return snapshot.docs.map((doc) => ({
     id: doc.id,
@@ -74,44 +80,46 @@ export async function createProduct(product: Product) {
   const userId = auth.currentUser?.uid;
   if (!userId) throw new Error('Usuário não autenticado');
 
-  return await addDoc(products, {
+  return await addDoc(productsCollection(userId), {
     ...product,
-    userId,
     createdAt: Date.now(),
   });
 }
 
 export async function updateProduct(id: string, product: Partial<Product>) {
-  return await updateDoc(doc(db, 'products', id), product);
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error('Usuário não autenticado');
+
+  return await updateDoc(doc(db, 'users', userId, 'products', id), product);
 }
 
 export async function deleteProduct(id: string) {
-  return await deleteDoc(doc(db, 'products', id));
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error('Usuário não autenticado');
+
+  return await deleteDoc(doc(db, 'users', userId, 'products', id));
 }
 
 export async function getProduct(id: string): Promise<Product | null> {
-  const snapshot = await getDoc(doc(db, 'products', id));
+  const userId = auth.currentUser?.uid;
+  if (!userId) return null;
+
+  const snapshot = await getDoc(doc(db, 'users', userId, 'products', id));
 
   if (!snapshot.exists()) {
     return null;
   }
 
-  const product = { id: snapshot.id, ...snapshot.data() } as Product;
-
-  if (product.userId !== auth.currentUser?.uid) {
-    return null;
-  }
-
-  return product;
+  return { id: snapshot.id, ...snapshot.data() } as Product;
 }
 
-// Categories
-const categories = collection(db, 'categories');
+// Categories (subcollection: users/{uid}/categories)
+function categoriesCollection(uid: string) {
+  return collection(db, 'users', uid, 'categories');
+}
 
 export async function getUserCategories(userId: string): Promise<Category[]> {
-  const snapshot = await getDocs(
-    query(categories, where('userId', '==', userId)),
-  );
+  const snapshot = await getDocs(categoriesCollection(userId));
 
   return snapshot.docs.map((doc) => ({
     id: doc.id,
@@ -124,18 +132,20 @@ export async function createCategory(name: string): Promise<Category> {
   if (!userId) throw new Error('Usuário não autenticado');
 
   const createdAt = Date.now();
-  const docRef = await addDoc(categories, { name, userId, createdAt });
+  const docRef = await addDoc(categoriesCollection(userId), { name, createdAt });
 
-  return { id: docRef.id, name, userId, createdAt };
+  return { id: docRef.id, name, createdAt };
 }
 
-// User profiles & usernames
-const users = collection(db, 'users');
-const usernames = collection(db, 'usernames');
-
+// Usernames are now just a field on the users/{uid} doc (no separate
+// collection). Uniqueness is enforced with a best-effort query check —
+// see the note in the migration writeup about the tradeoff vs. the old
+// atomic usernames/{username} transaction.
 export async function isUsernameAvailable(username: string): Promise<boolean> {
-  const snapshot = await getDoc(doc(usernames, username));
-  return !snapshot.exists();
+  const snapshot = await getDocs(
+    query(users, where('username', '==', username), limit(1)),
+  );
+  return snapshot.empty;
 }
 
 export async function createUserProfile({
@@ -150,23 +160,18 @@ export async function createUserProfile({
   const uid = auth.currentUser?.uid;
   if (!uid) throw new Error('Usuário não autenticado');
 
-  const usernameRef = doc(usernames, username);
-  const userRef = doc(users, uid);
-  const createdAt = Date.now();
+  const available = await isUsernameAvailable(username);
+  if (!available) {
+    throw new Error('Este nome de usuário já está em uso.');
+  }
 
-  await runTransaction(db, async (transaction) => {
-    const usernameSnapshot = await transaction.get(usernameRef);
-    if (usernameSnapshot.exists()) {
-      throw new Error('Este nome de usuário já está em uso.');
-    }
-    transaction.set(usernameRef, { uid });
-    transaction.set(userRef, {
-      uid,
-      username,
-      displayName,
-      photoURL: photoURL ?? null,
-      createdAt,
-    });
+  const createdAt = Date.now();
+  await setDoc(doc(users, uid), {
+    uid,
+    username,
+    displayName,
+    photoURL: photoURL ?? null,
+    createdAt,
   });
 
   return { uid, username, displayName, photoURL: photoURL ?? undefined, createdAt };
@@ -181,11 +186,11 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
 export async function getUserByUsername(
   username: string,
 ): Promise<UserProfile | null> {
-  const usernameSnapshot = await getDoc(doc(usernames, username));
-  if (!usernameSnapshot.exists()) return null;
-
-  const { uid } = usernameSnapshot.data() as { uid: string };
-  return await getUserProfile(uid);
+  const snapshot = await getDocs(
+    query(users, where('username', '==', username), limit(1)),
+  );
+  if (snapshot.empty) return null;
+  return snapshot.docs[0].data() as UserProfile;
 }
 
 // Comments
