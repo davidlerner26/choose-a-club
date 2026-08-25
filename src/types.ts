@@ -8,6 +8,7 @@ export type Product = {
   store: string;
   url: string;
   bought?: boolean;
+  available?: boolean;
   createdAt?: number;
 };
 

@@ -297,9 +297,13 @@ function acharProduto(no, vistos = new Set()) {
     return null;
   }
   const tipo = no['@type'];
+  // ProductGroup (comum em Shopify): um produto com uma variação por
+  // tamanho/cor em "hasVariant". Precisa ser tratado como o produto em si
+  // (com todas as variações), não descer e pegar só a primeira variação.
+  const tiposAceitos = ['product', 'productgroup'];
   const ehProduto = Array.isArray(tipo)
-    ? tipo.some((t) => String(t).toLowerCase() === 'product')
-    : String(tipo || '').toLowerCase() === 'product';
+    ? tipo.some((t) => tiposAceitos.includes(String(t).toLowerCase()))
+    : tiposAceitos.includes(String(tipo || '').toLowerCase());
   if (ehProduto) return no;
   for (const k of ['@graph', 'mainEntity', 'itemListElement', 'hasVariant']) {
     const r = acharProduto(no[k], vistos);
@@ -322,24 +326,46 @@ function lerJsonLd(html, base) {
     const p = acharProduto(obj);
     if (!p) continue;
 
-    const ofertas = Array.isArray(p.offers) ? p.offers[0] : p.offers || {};
-    let img = p.image;
+    // offers pode vir: (a) direto no produto, como objeto ou array (um item
+    // por tamanho/variação), ou (b) em ProductGroup, uma variação por
+    // tamanho dentro de "hasVariant", cada uma com sua própria "offers".
+    // Em qualquer caso, não basta olhar a primeira: se ela estiver esgotada
+    // mas outro tamanho (ex: P) ainda tiver estoque, o produto está
+    // disponível.
+    const ofertasDoNo = (no) => {
+      const ofertas = Array.isArray(no.offers) ? no.offers : [no.offers || {}];
+      return ofertas.filter(Boolean);
+    };
+
+    const variantes = Array.isArray(p.hasVariant)
+      ? p.hasVariant
+      : p.hasVariant
+        ? [p.hasVariant]
+        : null;
+
+    const listaOfertas = variantes
+      ? variantes.flatMap(ofertasDoNo)
+      : ofertasDoNo(p);
+    const primeiraOferta = listaOfertas[0] || {};
+
+    let img = p.image || (variantes && variantes[0] && variantes[0].image);
     if (Array.isArray(img)) img = img[0];
     if (img && typeof img === 'object') img = img.url || img.contentUrl;
 
-    const disp = String(ofertas.availability || '').toLowerCase();
+    const disponivel = listaOfertas.some((oferta) => {
+      const disp = String((oferta || {}).availability || '').toLowerCase();
+      return disp ? !disp.includes('outofstock') && !disp.includes('soldout') : true;
+    });
 
     return {
       nome: typeof p.name === 'string' ? p.name : null,
       marca: typeof p.brand === 'string' ? p.brand : p.brand?.name || null,
       categoria: classificar(p.category, p.name),
       categoriaLoja: typeof p.category === 'string' ? p.category : null,
-      preco: parsePreco(ofertas.price ?? ofertas.lowPrice),
+      preco: parsePreco(primeiraOferta.price ?? primeiraOferta.lowPrice),
       precoDe: null,
       imagem: absolutizar(img, base),
-      disponivel: disp
-        ? !disp.includes('outofstock') && !disp.includes('soldout')
-        : true,
+      disponivel,
       fonte: 'json-ld',
     };
   }

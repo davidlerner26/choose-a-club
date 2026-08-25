@@ -1,4 +1,28 @@
-export const extractProduct = async (link: string) => {
+export type ExtractedProduct = {
+  id: string;
+  name: string;
+  marca?: string;
+  price?: number;
+  precoDe?: number;
+  imagem?: string;
+  store?: string;
+  link: string;
+  disponivel?: boolean;
+  adicionadoEm: string;
+  verificadoEm: string;
+  categoria?: string;
+};
+
+export type ExtractionFailure = {
+  manual: true;
+  link: string;
+  loja?: string;
+  motivo?: string;
+};
+
+export const extractProduct = async (
+  link: string,
+): Promise<ExtractedProduct | ExtractionFailure> => {
   const r = await fetch(
     '/.netlify/functions/extract?url=' + encodeURIComponent(link),
   );

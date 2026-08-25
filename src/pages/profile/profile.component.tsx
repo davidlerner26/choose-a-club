@@ -4,13 +4,20 @@ import { useForm } from 'react-hook-form';
 import type { Category, Product, SortOption, UserProfile } from '@/types';
 import AddProductDialog from '@/components/add-product-dialog/add-product-dialog.component';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { IconPlus, IconRefresh } from '@tabler/icons-react';
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlus,
+  IconRefresh,
+} from '@tabler/icons-react';
 import {
   createCategory,
   getAllProducts,
   getUserByUsername,
   getUserCategories,
 } from '@/firebase/firebase';
+import { refreshProduct, persistRefreshedProduct } from '@/lib/refresh-product';
+import { runWithConcurrency } from '@/lib/concurrency';
 import { Spinner } from '@/components/ui/spinner';
 import Categories from '@/components/categories/categories.component';
 import Options from '@/components/options/options.component';
@@ -22,6 +29,7 @@ import SearchField from '@/components/search-field/search-field.component';
 import SortSelect from '@/components/sort-select/sort-select.component';
 
 const TUDO = 'Tudo';
+const PAGE_SIZE = 20;
 
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
@@ -35,11 +43,19 @@ export default function ProfilePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // ids que já foram conferidos na loja (preço/disponibilidade) nesta sessão —
+  // só essas aparecem na tela; o resto some/aparece com animação conforme a
+  // página é visitada, pra não bater na API por produtos que talvez nunca
+  // sejam vistos.
+  const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const [refreshTick, setRefreshTick] = useState<number>(0);
   const [optionSelected, setOptionSelected] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>(TUDO);
   const [product, setProduct] = useState<Product>();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [page, setPage] = useState<number>(1);
+  const [lastFilterKey, setLastFilterKey] = useState<string>('');
 
   const isOwner = !!user && !!profile && user.uid === profile.uid;
 
@@ -93,15 +109,25 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!profile) return;
+    let cancelled = false;
     async function fetchProducts() {
-      await updateProducts(profile!.uid);
+      setIsLoading(true);
+      const response = await getAllProducts(profile!.uid);
+      if (cancelled) return;
+      setProducts(response);
+      setRevealedIds(new Set());
+      setIsLoading(false);
     }
     async function fetchCategories() {
       const response = await getUserCategories(profile!.uid);
+      if (cancelled) return;
       setCategories(response);
     }
     fetchProducts();
     fetchCategories();
+    return () => {
+      cancelled = true;
+    };
   }, [profile]);
 
   const productsView = useMemo(() => {
@@ -127,6 +153,80 @@ export default function ProfilePage() {
       }
     });
   }, [products, selectedCategory, optionSelected, searchQuery, sortBy]);
+
+  const filterKey = `${selectedCategory}|${optionSelected}|${searchQuery}|${sortBy}`;
+  if (filterKey !== lastFilterKey) {
+    setLastFilterKey(filterKey);
+    setPage(1);
+  }
+
+  const totalPages = Math.max(1, Math.ceil(productsView.length / PAGE_SIZE));
+  if (page > totalPages) {
+    setPage(totalPages);
+  }
+
+  const pagedProductsView = useMemo(
+    () => productsView.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [productsView, page],
+  );
+
+  // string estável com os ids da página atual — só muda quando a página
+  // (ou os filtros) mudam, não a cada vez que um produto é atualizado
+  const pagedProductIds = useMemo(
+    () => pagedProductsView.map((item) => item.id).join(','),
+    [pagedProductsView],
+  );
+
+  const isRefreshingPage = pagedProductsView.some(
+    (item) => !revealedIds.has(item.id),
+  );
+
+  const visibleProductsView = pagedProductsView.filter((item) =>
+    revealedIds.has(item.id),
+  );
+
+  // Confere preço/disponibilidade na loja só para os produtos da página
+  // atual (com concorrência limitada), assim que ela é aberta pela primeira
+  // vez — cada um aparece na tela (com animação) conforme o refresh termina.
+  useEffect(() => {
+    if (!profile) return;
+    const ids = pagedProductIds ? pagedProductIds.split(',') : [];
+    const pending = pagedProductsView.filter(
+      (item) => ids.includes(item.id) && !revealedIds.has(item.id),
+    );
+    if (pending.length === 0) return;
+
+    let cancelled = false;
+
+    async function refreshPending() {
+      await runWithConcurrency(pending, 4, async (baseProduct) => {
+        const refreshed = await refreshProduct(baseProduct);
+        if (cancelled) return;
+        if (isOwner) {
+          await persistRefreshedProduct(refreshed, baseProduct);
+        }
+        setProducts((prev) =>
+          prev.map((item) => (item.id === refreshed.id ? refreshed : item)),
+        );
+        setRevealedIds((prev) => new Set(prev).add(refreshed.id));
+      });
+    }
+
+    refreshPending();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- só deve rodar quando a página/filtros mudam (pagedProductIds) ou um refresh manual é pedido (refreshTick), não a cada vez que revealedIds/products muda
+  }, [pagedProductIds, profile, refreshTick]);
+
+  const refreshCurrentPage = () => {
+    setRevealedIds((prev) => {
+      const next = new Set(prev);
+      pagedProductsView.forEach((item) => next.delete(item.id));
+      return next;
+    });
+    setRefreshTick((tick) => tick + 1);
+  };
 
   const priceWithCurrency = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -197,9 +297,13 @@ export default function ProfilePage() {
           <div className="flex flex-wrap gap-3">
             <Button
               variant="outline"
-              onClick={() => updateProducts(profile.uid)}
+              disabled={isRefreshingPage}
+              onClick={refreshCurrentPage}
             >
-              <IconRefresh data-icon="inline-start" />
+              <IconRefresh
+                data-icon="inline-start"
+                className={isRefreshingPage ? 'animate-spin' : ''}
+              />
               Atualizar
             </Button>
             {isOwner && (
@@ -280,11 +384,38 @@ export default function ProfilePage() {
         setIsLoading={setIsLoading}
         setId={setId}
         setOpen={setOpen}
-        productsView={productsView}
+        productsView={visibleProductsView}
         isOwner={isOwner}
         profileUserId={profile.uid}
         currentUser={user}
+        isRefreshingProducts={isRefreshingPage}
       />
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-8">
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={page <= 1}
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+          >
+            <IconChevronLeft stroke={2} />
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            Página {page} de {totalPages}
+          </p>
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={page >= totalPages}
+            onClick={() =>
+              setPage((current) => Math.min(totalPages, current + 1))
+            }
+          >
+            <IconChevronRight stroke={2} />
+          </Button>
+        </div>
+      )}
     </main>
   );
 }

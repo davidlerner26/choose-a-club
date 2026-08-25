@@ -1,5 +1,6 @@
 import type { User } from 'firebase/auth';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import NoProductsFound from '../no-products-found/no-products-found.component';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -22,6 +23,7 @@ export default function Products({
   isOwner,
   profileUserId,
   currentUser,
+  isRefreshingProducts,
 }: {
   priceWithCurrency: (price: number) => string;
   updateProducts: () => Promise<void>;
@@ -32,6 +34,7 @@ export default function Products({
   isOwner: boolean;
   profileUserId: string;
   currentUser: User | null;
+  isRefreshingProducts: boolean;
 }) {
   const firstLetterUppercase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -77,8 +80,23 @@ export default function Products({
       {productsView?.length > 0 ? (
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {productsView?.map(
-            ({ id, name, price, link, store, category, url, bought }) => (
-              <li key={id} title={name}>
+            ({
+              id,
+              name,
+              price,
+              priceFrom,
+              link,
+              store,
+              category,
+              url,
+              bought,
+              available,
+            }) => (
+              <li
+                key={id}
+                title={name}
+                className="animate-in slide-in-from-right fade-in duration-500 ease-out"
+              >
                 <Card className="h-full transition-shadow hover:shadow-md">
                   <CardContent>
                     <div
@@ -93,9 +111,19 @@ export default function Products({
                     <p className="font-semibold text-lg truncate">
                       {firstLetterUppercase(name)}
                     </p>
-                    <p className="text-primary font-semibold">
-                      {price ? priceWithCurrency(price) : 'preço a conferir'}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-primary font-semibold">
+                        {price ? priceWithCurrency(price) : 'preço a conferir'}
+                      </p>
+                      {priceFrom && priceFrom > price && (
+                        <p className="text-sm text-muted-foreground line-through">
+                          {priceWithCurrency(priceFrom)}
+                        </p>
+                      )}
+                      {available === false && (
+                        <Badge variant="destructive">Indisponível</Badge>
+                      )}
+                    </div>
                   </CardContent>
                   <CardFooter>
                     <div className="flex items-center justify-between w-full">
@@ -157,7 +185,7 @@ export default function Products({
             ),
           )}
         </ul>
-      ) : (
+      ) : isRefreshingProducts ? null : (
         <NoProductsFound />
       )}
     </div>

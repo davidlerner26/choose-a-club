@@ -40,15 +40,15 @@ export default function LinkField({
       setIsLoading(true);
       try {
         const response = await extractProduct(link);
-        if (response) {
+        if (response && !('manual' in response)) {
           onProductFetched({
             id: crypto.randomUUID(),
-            name: response.name,
-            store: response.marca,
-            price: response.price,
-            url: response.imagem,
+            name: response.name ?? '',
+            store: response.marca ?? '',
+            price: response.price ?? 0,
+            url: response.imagem ?? '',
             link: response.link,
-            category: response.categoria,
+            category: response.categoria ?? '',
             priceFrom: response.precoDe,
           });
         }
