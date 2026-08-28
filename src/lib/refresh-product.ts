@@ -40,16 +40,22 @@ export async function persistRefreshedProduct(
     refreshed.url !== original.url;
   if (!changed) return;
 
+  // Firestore's updateDoc() rejects explicit `undefined` values — omit
+  // priceFrom entirely instead of sending it as undefined.
+  const updates: Partial<Product> = {
+    price: refreshed.price,
+    available: refreshed.available,
+    name: refreshed.name,
+    store: refreshed.store,
+    category: refreshed.category,
+    url: refreshed.url,
+  };
+  if (refreshed.priceFrom !== undefined) {
+    updates.priceFrom = refreshed.priceFrom;
+  }
+
   try {
-    await updateProduct(refreshed.id, {
-      price: refreshed.price,
-      priceFrom: refreshed.priceFrom,
-      available: refreshed.available,
-      name: refreshed.name,
-      store: refreshed.store,
-      category: refreshed.category,
-      url: refreshed.url,
-    });
+    await updateProduct(refreshed.id, updates);
   } catch (error) {
     console.error(error);
   }

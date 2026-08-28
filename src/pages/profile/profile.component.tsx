@@ -56,6 +56,9 @@ export default function ProfilePage() {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [page, setPage] = useState<number>(1);
   const [lastFilterKey, setLastFilterKey] = useState<string>('');
+  const [categoryBeforeDialog, setCategoryBeforeDialog] =
+    useState<string>(TUDO);
+  const [wasDialogOpen, setWasDialogOpen] = useState<boolean>(false);
 
   const isOwner = !!user && !!profile && user.uid === profile.uid;
 
@@ -158,6 +161,16 @@ export default function ProfilePage() {
   if (filterKey !== lastFilterKey) {
     setLastFilterKey(filterKey);
     setPage(1);
+  }
+
+  // guarda a categoria filtrada quando o diálogo de adicionar/editar produto
+  // abre, pra restaurar depois de salvar (em vez de trocar pra categoria do
+  // produto que acabou de ser adicionado/editado)
+  if (open !== wasDialogOpen) {
+    setWasDialogOpen(open);
+    if (open) {
+      setCategoryBeforeDialog(selectedCategory);
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(productsView.length / PAGE_SIZE));
@@ -320,7 +333,10 @@ export default function ProfilePage() {
                     setOpen={setOpen}
                     id={id}
                     setId={setId}
-                    updateProducts={() => updateProducts(profile.uid)}
+                    updateProducts={async () => {
+                      await updateProducts(profile.uid);
+                      setSelectedCategory(categoryBeforeDialog);
+                    }}
                     product={product}
                     setProduct={setProduct}
                     selectedCategory={selectedCategory}
