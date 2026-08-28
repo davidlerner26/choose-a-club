@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import type { User } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +23,7 @@ export default function ChooseUsernameDialog({
   user: User;
   onCreated: (profile: UserProfile) => void;
 }) {
+  const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -35,15 +37,13 @@ export default function ChooseUsernameDialog({
     const normalized = username.trim().toLowerCase();
 
     if (!USERNAME_REGEX.test(normalized)) {
-      setError(
-        'Use de 3 a 20 letras minúsculas, números, "." ou "_", sem espaços.',
-      );
+      setError(t('chooseUsername.errors.invalidFormat'));
       return;
     }
 
     const available = await isUsernameAvailable(normalized);
     if (!available) {
-      setError('Esse nome de usuário já está em uso.');
+      setError(t('chooseUsername.errors.taken'));
       return;
     }
 
@@ -55,7 +55,7 @@ export default function ChooseUsernameDialog({
       });
       onCreated(profile);
     } catch {
-      setError('Esse nome de usuário já está em uso.');
+      setError(t('chooseUsername.errors.taken'));
     }
   };
 
@@ -63,9 +63,9 @@ export default function ChooseUsernameDialog({
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <img className="w-14" src="favicon.svg" />
+          <img className="w-14" src="/favicon.svg" />
           <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
-            Escolha o nome do seu clube
+            {t('chooseUsername.title')}
           </h1>
         </div>
 
@@ -73,12 +73,12 @@ export default function ChooseUsernameDialog({
           <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
-                <Label htmlFor="username">Nome do clube</Label>
+                <Label htmlFor="username">{t('chooseUsername.label')}</Label>
                 <Input
                   id="username"
                   autoFocus
                   {...register('username', {
-                    required: 'Nome do clube é obrigatório',
+                    required: t('chooseUsername.required'),
                   })}
                 />
                 <FieldError>{errors.username?.message}</FieldError>
@@ -91,7 +91,7 @@ export default function ChooseUsernameDialog({
                 disabled={isSubmitting}
               >
                 {isSubmitting && <Spinner className="size-4" />}
-                Continuar
+                {t('chooseUsername.continue')}
               </Button>
             </FieldGroup>
           </form>

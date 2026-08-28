@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { FirebaseError } from 'firebase/app';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ import {
   signInWithGoogle,
   signUpWithEmail,
 } from '@/firebase/firebase';
+import i18n from '@/i18n/i18n';
 
 function GoogleIcon() {
   return (
@@ -58,21 +60,21 @@ function firebaseErrorMessage(error: unknown): string {
   const code = error instanceof FirebaseError ? error.code : '';
   switch (code) {
     case 'auth/email-already-in-use':
-      return 'Este e-mail já está cadastrado.';
+      return i18n.t('login.errors.emailInUse');
     case 'auth/invalid-email':
-      return 'E-mail inválido.';
+      return i18n.t('login.errors.invalidEmail');
     case 'auth/weak-password':
-      return 'A senha precisa ter pelo menos 6 caracteres.';
+      return i18n.t('login.errors.weakPassword');
     case 'auth/user-not-found':
     case 'auth/wrong-password':
     case 'auth/invalid-credential':
-      return 'E-mail ou senha incorretos.';
+      return i18n.t('login.errors.wrongCredentials');
     case 'auth/too-many-requests':
-      return 'Muitas tentativas. Tente novamente mais tarde.';
+      return i18n.t('login.errors.tooManyRequests');
     case 'auth/popup-closed-by-user':
       return '';
     default:
-      return 'Algo deu errado. Tente novamente.';
+      return i18n.t('login.errors.generic');
   }
 }
 
@@ -82,6 +84,7 @@ type EmailFormValues = {
 };
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isAppleLoading, setIsAppleLoading] = useState(false);
@@ -142,14 +145,11 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <img className="w-14" src="favicon.svg" />
+          <img className="w-14" src="/favicon.svg" />
           <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
             Choose a Club
           </h1>
-          <p className="text-muted-foreground">
-            Guarde os produtos que você ama e nunca perca de vista o que deseja
-            comprar
-          </p>
+          <p className="text-muted-foreground">{t('login.subtitle')}</p>
         </div>
 
         <div className="rounded-xl border bg-card p-6 shadow-sm">
@@ -161,7 +161,7 @@ export default function LoginPage() {
             disabled={isGoogleLoading || isAppleLoading || isSubmitting}
           >
             {isGoogleLoading ? <Spinner className="size-4" /> : <GoogleIcon />}
-            Continuar com o Google
+            {t('login.continueWithGoogle')}
           </Button>
 
           <Button
@@ -172,36 +172,36 @@ export default function LoginPage() {
             disabled={isGoogleLoading || isAppleLoading || isSubmitting}
           >
             {isAppleLoading ? <Spinner className="size-4" /> : <AppleIcon />}
-            Continuar com a Apple
+            {t('login.continueWithApple')}
           </Button>
 
-          <FieldSeparator className="mb-2">ou</FieldSeparator>
+          <FieldSeparator className="mb-2">{t('login.or')}</FieldSeparator>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
-                <Label htmlFor="email">E-mail</Label>
+                <Label htmlFor="email">{t('login.email')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="voce@exemplo.com"
+                  placeholder={t('login.emailPlaceholder')}
                   {...register('email', {
-                    required: 'E-mail é obrigatório',
+                    required: t('login.emailRequired'),
                   })}
                 />
                 <FieldError>{errors.email?.message}</FieldError>
               </Field>
               <Field>
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password">{t('login.password')}</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
                   {...register('password', {
-                    required: 'Senha é obrigatória',
+                    required: t('login.passwordRequired'),
                     minLength: {
                       value: 6,
-                      message: 'A senha precisa ter pelo menos 6 caracteres',
+                      message: t('login.passwordMinLength'),
                     },
                   })}
                 />
@@ -215,19 +215,19 @@ export default function LoginPage() {
                 disabled={isSubmitting || isGoogleLoading || isAppleLoading}
               >
                 {isSubmitting && <Spinner className="size-4" />}
-                {mode === 'signup' ? 'Criar conta' : 'Entrar'}
+                {mode === 'signup' ? t('login.signUp') : t('login.signIn')}
               </Button>
             </FieldGroup>
           </form>
 
           <p className="mt-5 text-center text-sm text-muted-foreground">
-            {mode === 'signup' ? 'Já tem uma conta?' : 'Ainda não tem conta?'}{' '}
+            {mode === 'signup' ? t('login.hasAccount') : t('login.noAccount')}{' '}
             <button
               type="button"
               className="font-medium text-primary hover:underline"
               onClick={toggleMode}
             >
-              {mode === 'signup' ? 'Entrar' : 'Criar conta'}
+              {mode === 'signup' ? t('login.signIn') : t('login.signUp')}
             </button>
           </p>
         </div>

@@ -22,6 +22,7 @@ import {
   useWatch,
   type SubmitHandler,
 } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -38,16 +39,11 @@ import { createProduct, getProduct, updateProduct } from '@/firebase/firebase';
 import { useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import { IconPlus } from '@tabler/icons-react';
+import { useLocale } from '@/hooks/use-locale';
+import { ALL_CATEGORIES } from '@/lib/constants';
 import LinkField from '../link-field/link-field.component';
 
 const NEW_CATEGORY_VALUE = '__new_category__';
-
-function formatCentsToPtBr(cents: number): string {
-  return (cents / 100).toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
 
 export default function AddProductDialog({
   categories,
@@ -72,8 +68,10 @@ export default function AddProductDialog({
   setProduct?: (product: Product | undefined) => void;
   selectedCategory?: string;
 }) {
+  const { t } = useTranslation();
+  const { formatPrice, currencySymbol } = useLocale();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [priceDisplay, setPriceDisplay] = useState<string>('0,00');
+  const [priceDisplay, setPriceDisplay] = useState<string>(formatPrice(0));
   const [isAddingCategory, setIsAddingCategory] = useState<boolean>(false);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
   const [isSavingCategory, setIsSavingCategory] = useState<boolean>(false);
@@ -113,11 +111,15 @@ export default function AddProductDialog({
       }
       resetFields(false);
       await updateProducts();
-      toast.success(id ? 'Produto atualizado' : 'Produto adicionado');
+      toast.success(
+        id ? t('addProductDialog.toasts.updated') : t('addProductDialog.toasts.added'),
+      );
     } catch (error) {
       console.error(error);
       toast.error(
-        id ? 'Não consegui atualizar o produto' : 'Não consegui adicionar o produto',
+        id
+          ? t('addProductDialog.toasts.updateError')
+          : t('addProductDialog.toasts.addError'),
         { description: product.name },
       );
     }
@@ -151,7 +153,7 @@ export default function AddProductDialog({
       setId(null);
       setProduct?.(undefined);
       reset();
-      setPriceDisplay('0,00');
+      setPriceDisplay(formatPrice(0));
     }
   };
 
@@ -165,7 +167,7 @@ export default function AddProductDialog({
       store: store || '',
       url: url || '',
     });
-    setPriceDisplay(formatCentsToPtBr(Math.round((price || 0) * 100)));
+    setPriceDisplay(formatPrice(Math.round((price || 0) * 100)));
   };
 
   useEffect(() => {
@@ -178,7 +180,7 @@ export default function AddProductDialog({
         if (response) {
           setFieldsDefaultValues(response);
         }
-      } else if (selectedCategory && selectedCategory !== 'Tudo') {
+      } else if (selectedCategory && selectedCategory !== ALL_CATEGORIES) {
         setValue('category', selectedCategory);
       }
       setIsLoading(false);
@@ -196,10 +198,9 @@ export default function AddProductDialog({
         ) : (
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>Nova peça</DialogTitle>
+              <DialogTitle>{t('addProductDialog.title')}</DialogTitle>
               <DialogDescription className="mb-4">
-                Cole o link, clique em Adicionar e aguarde: buscamos as
-                informações do produto automaticamente.
+                {t('addProductDialog.description')}
               </DialogDescription>
             </DialogHeader>
             <FieldGroup className="mb-8">
@@ -212,9 +213,7 @@ export default function AddProductDialog({
                 onProductFetched={(product) => {
                   setValue('name', product.name);
                   setValue('price', product.price);
-                  setPriceDisplay(
-                    formatCentsToPtBr(Math.round(product.price * 100)),
-                  );
+                  setPriceDisplay(formatPrice(Math.round(product.price * 100)));
                   setValue('category', product.category);
                   setValue('store', product.store);
                   setValue('url', product.url);
@@ -222,35 +221,37 @@ export default function AddProductDialog({
                 displayLabel={true}
               />
               <Field>
-                <Label htmlFor="name">Nome da peça</Label>
+                <Label htmlFor="name">{t('addProductDialog.nameLabel')}</Label>
                 <Input
                   id="name"
-                  placeholder="Vestido midi de linho"
+                  placeholder={t('addProductDialog.namePlaceholder')}
                   {...register('name', {
-                    required: 'Link da loja é obrigatório',
+                    required: t('addProductDialog.nameRequired'),
                   })}
                 />
                 <FieldError>{errors.name?.message}</FieldError>
               </Field>
               <Field>
-                <Label htmlFor="price">Preço (R$)</Label>
+                <Label htmlFor="price">
+                  {t('addProductDialog.priceLabel', { symbol: currencySymbol })}
+                </Label>
                 <Controller
                   name="price"
                   control={control}
                   rules={{
                     validate: (value) =>
-                      Number(value) > 0 || 'Preço é obrigatório',
+                      Number(value) > 0 || t('addProductDialog.priceRequired'),
                   }}
                   render={({ field }) => (
                     <Input
                       id="price"
                       inputMode="numeric"
-                      placeholder="0,00"
+                      placeholder={formatPrice(0)}
                       value={priceDisplay}
                       onChange={(e) => {
                         const digits = e.target.value.replace(/\D/g, '');
                         const cents = digits ? parseInt(digits, 10) : 0;
-                        setPriceDisplay(formatCentsToPtBr(cents));
+                        setPriceDisplay(formatPrice(cents));
                         field.onChange(cents / 100);
                       }}
                       onBlur={field.onBlur}
@@ -260,12 +261,12 @@ export default function AddProductDialog({
                 <FieldError>{errors.price?.message}</FieldError>
               </Field>
               <Field>
-                <FieldLabel>Categoria</FieldLabel>
+                <FieldLabel>{t('addProductDialog.categoryLabel')}</FieldLabel>
                 {isAddingCategory ? (
                   <div className="flex gap-2">
                     <Input
                       autoFocus
-                      placeholder="Nome da nova categoria"
+                      placeholder={t('addProductDialog.newCategoryPlaceholder')}
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value)}
                       onKeyDown={(e) => {
@@ -284,7 +285,7 @@ export default function AddProductDialog({
                       disabled={isSavingCategory || !newCategoryName.trim()}
                       onClick={handleCreateCategory}
                     >
-                      {isSavingCategory ? <Spinner /> : 'Adicionar'}
+                      {isSavingCategory ? <Spinner /> : t('common.add')}
                     </Button>
                     <Button
                       type="button"
@@ -292,14 +293,14 @@ export default function AddProductDialog({
                       variant="outline"
                       onClick={cancelCreateCategory}
                     >
-                      Cancelar
+                      {t('common.cancel')}
                     </Button>
                   </div>
                 ) : (
                   <Controller
                     name="category"
                     control={control}
-                    rules={{ required: 'Categoria é obrigatória' }}
+                    rules={{ required: t('addProductDialog.categoryRequired') }}
                     render={({ field }) => (
                       <Select
                         value={field.value}
@@ -312,7 +313,11 @@ export default function AddProductDialog({
                         }}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Escolhe uma categoria" />
+                          <SelectValue
+                            placeholder={t(
+                              'addProductDialog.chooseCategoryPlaceholder',
+                            )}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
@@ -326,7 +331,7 @@ export default function AddProductDialog({
                           <SelectGroup>
                             <SelectItem value={NEW_CATEGORY_VALUE}>
                               <IconPlus className="size-4" />
-                              Adicionar categoria
+                              {t('addProductDialog.addCategory')}
                             </SelectItem>
                           </SelectGroup>
                         </SelectContent>
@@ -337,11 +342,11 @@ export default function AddProductDialog({
                 <FieldError>{errors?.category?.message}</FieldError>
               </Field>
               <Field>
-                <Label htmlFor="store">Loja</Label>
+                <Label htmlFor="store">{t('addProductDialog.storeLabel')}</Label>
                 <Input
                   id="store"
                   {...register('store', {
-                    required: 'Nome da loja é obrigatório',
+                    required: t('addProductDialog.storeRequired'),
                   })}
                 />
                 <FieldError>{errors.store?.message}</FieldError>
@@ -351,27 +356,29 @@ export default function AddProductDialog({
                 <Input id="picture" type="file" />
               </Field> */}
               <Field>
-                <Label htmlFor="url">URL da imagem</Label>
+                <Label htmlFor="url">{t('addProductDialog.imageUrlLabel')}</Label>
                 <Input
                   id="url"
-                  placeholder="Cole aqui a URL da imagem"
+                  placeholder={t('addProductDialog.imageUrlPlaceholder')}
                   {...register('url', {
-                    required: 'URL da imagem é obrigatório',
+                    required: t('addProductDialog.imageUrlRequired'),
                   })}
                 />
                 <FieldError>{errors.url?.message}</FieldError>
                 {imageUrl && (
                   <img
                     src={imageUrl}
-                    alt="Pré-visualização da imagem"
+                    alt={t('addProductDialog.imagePreviewAlt')}
                     className="mt-2 h-40 w-full rounded-md object-cover"
                   />
                 )}
               </Field>
             </FieldGroup>
             <DialogFooter>
-              <DialogClose render={<Button variant="outline">Cancel</Button>} />
-              <Button type="submit">Adicionar à wishlist</Button>
+              <DialogClose
+                render={<Button variant="outline">{t('common.cancel')}</Button>}
+              />
+              <Button type="submit">{t('addProductDialog.submit')}</Button>
             </DialogFooter>
           </form>
         )}

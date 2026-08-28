@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@/components/ui/menu';
 import { IconLogout2, IconUser } from '@tabler/icons-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useOwnProfile } from '@/hooks/use-own-profile';
+import { useLocale } from '@/hooks/use-locale';
 import { signOutUser } from '@/firebase/firebase';
 
 function initials(name?: string | null) {
@@ -17,8 +19,10 @@ function initials(name?: string | null) {
 }
 
 export default function UserMenu() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useOwnProfile(user);
+  const { path } = useLocale();
 
   return (
     <Menu>
@@ -37,14 +41,14 @@ export default function UserMenu() {
       </MenuTrigger>
       <MenuContent>
         {profile && (
-          <MenuItem render={<Link to={`/${profile.username}`} />}>
+          <MenuItem render={<Link to={path(`/${profile.username}`)} />}>
             <IconUser />
-            Ver meu perfil
+            {t('userMenu.viewProfile')}
           </MenuItem>
         )}
         <MenuItem onClick={() => signOutUser()}>
           <IconLogout2 />
-          Sair
+          {t('userMenu.logout')}
         </MenuItem>
       </MenuContent>
     </Menu>

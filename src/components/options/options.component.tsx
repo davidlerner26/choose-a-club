@@ -1,5 +1,5 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import type { Option } from '@/types';
 
 export default function Options({
   selectOption,
@@ -8,9 +8,10 @@ export default function Options({
   selectOption: (bought: boolean) => void;
   optionSelected: boolean | undefined;
 }) {
-  const options: Option[] = [
-    { value: 'Desejando', selected: false, bought: false },
-    { value: 'Já comprei', selected: false, bought: true },
+  const { t } = useTranslation();
+  const options: { value: string; bought: boolean }[] = [
+    { value: t('options.wanted'), bought: false },
+    { value: t('options.bought'), bought: true },
   ];
 
   return (

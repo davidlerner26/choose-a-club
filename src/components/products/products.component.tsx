@@ -1,5 +1,6 @@
 import type { User } from 'firebase/auth';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import NoProductsFound from '../no-products-found/no-products-found.component';
@@ -37,6 +38,8 @@ export default function Products({
   currentUser: User | null;
   isRefreshingProducts: boolean;
 }) {
+  const { t } = useTranslation();
+
   const firstLetterUppercase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
@@ -64,10 +67,10 @@ export default function Products({
     try {
       await updateProduct(id, product);
       await updateProducts();
-      toast.success('Produto marcado como comprado');
+      toast.success(t('products.toasts.bought'));
     } catch (error) {
       console.error(error);
-      toast.error('Não consegui marcar o produto como comprado', {
+      toast.error(t('products.toasts.boughtError'), {
         description: name,
       });
       setIsLoading(false);
@@ -84,10 +87,10 @@ export default function Products({
     try {
       await deleteProduct(id);
       await updateProducts();
-      toast.success('Produto removido');
+      toast.success(t('products.toasts.removed'));
     } catch (error) {
       console.error(error);
-      toast.error('Não consegui remover o produto', { description: name });
+      toast.error(t('products.toasts.removedError'), { description: name });
       setIsLoading(false);
     }
   };
@@ -130,7 +133,9 @@ export default function Products({
                     </p>
                     <div className="flex items-center gap-2">
                       <p className="text-primary font-semibold">
-                        {price ? priceWithCurrency(price) : 'preço a conferir'}
+                        {price
+                          ? priceWithCurrency(price)
+                          : t('products.priceUnknown')}
                       </p>
                       {priceFrom && priceFrom > price && (
                         <p className="text-sm text-muted-foreground line-through">
@@ -138,7 +143,9 @@ export default function Products({
                         </p>
                       )}
                       {available === false && (
-                        <Badge variant="destructive">Indisponível</Badge>
+                        <Badge variant="destructive">
+                          {t('products.unavailable')}
+                        </Badge>
                       )}
                     </div>
                   </CardContent>
@@ -151,7 +158,7 @@ export default function Products({
                           rel="noopener noreferrer"
                           className={buttonVariants({ variant: 'link' })}
                         >
-                          Ver na loja
+                          {t('products.viewInStore')}
                           <IconExternalLink stroke={2} />
                         </a>
                       </div>

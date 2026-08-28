@@ -1,4 +1,6 @@
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
+import { ALL_CATEGORIES } from '@/lib/constants';
 
 export default function Categories({
   selectedCategory,
@@ -9,6 +11,8 @@ export default function Categories({
   selectCategory: (category: string) => void;
   categories: string[];
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-wrap gap-2">
       {categories.map((category) => (
@@ -19,7 +23,7 @@ export default function Categories({
           className="cursor-pointer select-none transition-colors hover:bg-accent hover:text-accent-foreground data-[selected=true]:hover:bg-primary/90"
           data-selected={selectedCategory === category}
         >
-          {category}
+          {category === ALL_CATEGORIES ? t('categories.all') : category}
         </Badge>
       ))}
     </div>

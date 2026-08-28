@@ -20,12 +20,6 @@ export type Category = {
 
 export type SortOption = 'recent' | 'price-asc' | 'price-desc';
 
-export type Option = {
-  value: string;
-  selected: boolean;
-  bought: boolean;
-};
-
 export type UserProfile = {
   uid: string;
   username: string;

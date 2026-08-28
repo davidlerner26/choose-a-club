@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Select,
   SelectContent,
@@ -8,12 +9,6 @@ import {
 } from '@/components/ui/select';
 import type { SortOption } from '@/types';
 
-const sortOptions: { value: SortOption; label: string }[] = [
-  { value: 'recent', label: 'Mais recente' },
-  { value: 'price-asc', label: 'Menor preço' },
-  { value: 'price-desc', label: 'Maior preço' },
-];
-
 export default function SortSelect({
   sortBy,
   setSortBy,
@@ -21,13 +16,20 @@ export default function SortSelect({
   sortBy: SortOption;
   setSortBy: (sortBy: SortOption) => void;
 }) {
+  const { t } = useTranslation();
+  const sortOptions: { value: SortOption; label: string }[] = [
+    { value: 'recent', label: t('sort.recent') },
+    { value: 'price-asc', label: t('sort.priceAsc') },
+    { value: 'price-desc', label: t('sort.priceDesc') },
+  ];
+
   return (
     <Select
       value={sortBy}
       onValueChange={(value) => setSortBy(value as SortOption)}
     >
       <SelectTrigger className="w-full sm:w-44">
-        <SelectValue placeholder="Ordenar por">
+        <SelectValue placeholder={t('sort.placeholder')}>
           {(value: SortOption) =>
             sortOptions.find((option) => option.value === value)?.label
           }

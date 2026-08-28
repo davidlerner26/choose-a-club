@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import type { User } from 'firebase/auth';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,6 +14,8 @@ import {
   getProductComments,
 } from '@/firebase/firebase';
 import { cn } from '@/lib/utils';
+import { useLocale } from '@/hooks/use-locale';
+import i18n from '@/i18n/i18n';
 import type { Comment } from '@/types';
 
 function initials(name?: string | null) {
@@ -28,12 +31,12 @@ function initials(name?: string | null) {
 function relativeTime(timestamp: number) {
   const diffMs = Date.now() - timestamp;
   const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return 'agora';
-  if (minutes < 60) return `há ${minutes} min`;
+  if (minutes < 1) return i18n.t('comments.now');
+  if (minutes < 60) return i18n.t('comments.minutesAgo', { count: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `há ${hours}h`;
+  if (hours < 24) return i18n.t('comments.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  return `há ${days}d`;
+  return i18n.t('comments.daysAgo', { count: days });
 }
 
 type FormValues = {
@@ -51,6 +54,8 @@ export default function Comments({
   currentUser: User | null;
   className?: string;
 }) {
+  const { t } = useTranslation();
+  const { path } = useLocale();
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -143,10 +148,10 @@ export default function Comments({
 
       {!currentUser ? (
         <p className="text-xs text-muted-foreground">
-          <Link to="/" className="underline">
-            Faça login
+          <Link to={path('/')} className="underline">
+            {t('comments.login')}
           </Link>{' '}
-          para comentar.
+          {t('comments.loginPrompt')}
         </p>
       ) : canComment ? (
         <form
@@ -154,12 +159,12 @@ export default function Comments({
           className="flex items-center gap-2"
         >
           <Input
-            placeholder="Deixe seu comentário"
+            placeholder={t('comments.placeholder')}
             className="h-8 min-w-0 flex-1 truncate text-sm"
             {...register('text', { required: true })}
           />
           <Button type="submit" size="sm" disabled={isSubmitting}>
-            {isSubmitting ? <Spinner className="size-4" /> : 'Comentar'}
+            {isSubmitting ? <Spinner className="size-4" /> : t('comments.submit')}
           </Button>
         </form>
       ) : null}

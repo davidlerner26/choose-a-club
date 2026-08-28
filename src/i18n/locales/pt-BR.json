@@ -1,0 +1,136 @@
+{
+  "common": {
+    "add": "Adicionar",
+    "cancel": "Cancelar",
+    "login": "Entrar",
+    "logout": "Sair"
+  },
+  "login": {
+    "subtitle": "Guarde os produtos que você ama e nunca perca de vista o que deseja comprar",
+    "continueWithGoogle": "Continuar com o Google",
+    "continueWithApple": "Continuar com a Apple",
+    "or": "ou",
+    "email": "E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "emailRequired": "E-mail é obrigatório",
+    "password": "Senha",
+    "passwordRequired": "Senha é obrigatória",
+    "passwordMinLength": "A senha precisa ter pelo menos 6 caracteres",
+    "signUp": "Criar conta",
+    "signIn": "Entrar",
+    "hasAccount": "Já tem uma conta?",
+    "noAccount": "Ainda não tem conta?",
+    "errors": {
+      "emailInUse": "Este e-mail já está cadastrado.",
+      "invalidEmail": "E-mail inválido.",
+      "weakPassword": "A senha precisa ter pelo menos 6 caracteres.",
+      "wrongCredentials": "E-mail ou senha incorretos.",
+      "tooManyRequests": "Muitas tentativas. Tente novamente mais tarde.",
+      "generic": "Algo deu errado. Tente novamente."
+    }
+  },
+  "chooseUsername": {
+    "title": "Escolha o nome do seu clube",
+    "label": "Nome do clube",
+    "required": "Nome do clube é obrigatório",
+    "continue": "Continuar",
+    "errors": {
+      "invalidFormat": "Use de 3 a 20 letras minúsculas, números, \".\" ou \"_\", sem espaços.",
+      "taken": "Esse nome de usuário já está em uso."
+    }
+  },
+  "profile": {
+    "notFoundTitle": "Perfil não encontrado",
+    "notFoundText": "Não existe nenhum usuário com esse nome.",
+    "backHome": "Voltar para o início",
+    "productCount_one": "{{count}} peça",
+    "productCount_other": "{{count}} peças",
+    "bought": " compradas",
+    "wanted": " desejadas",
+    "refresh": "Atualizar",
+    "addProduct": "Adicionar produto",
+    "linkPlaceholder": "Cole o link da peça aqui",
+    "page": "Página {{page}} de {{totalPages}}"
+  },
+  "products": {
+    "unavailable": "Indisponível",
+    "priceUnknown": "preço a conferir",
+    "viewInStore": "Ver na loja",
+    "toasts": {
+      "bought": "Produto marcado como comprado",
+      "boughtError": "Não consegui marcar o produto como comprado",
+      "removed": "Produto removido",
+      "removedError": "Não consegui remover o produto"
+    }
+  },
+  "categories": {
+    "all": "Tudo"
+  },
+  "options": {
+    "wanted": "Desejando",
+    "bought": "Já comprei"
+  },
+  "search": {
+    "placeholder": "Buscar peça..."
+  },
+  "sort": {
+    "placeholder": "Ordenar por",
+    "recent": "Mais recente",
+    "priceAsc": "Menor preço",
+    "priceDesc": "Maior preço"
+  },
+  "noProductsFound": {
+    "title": "A arara está vazia",
+    "subtitle": "Viu uma peça que amou? É só clicar em Adicionar Produto"
+  },
+  "addProductDialog": {
+    "title": "Nova peça",
+    "description": "Cole o link, clique em Adicionar e aguarde: buscamos as informações do produto automaticamente.",
+    "nameLabel": "Nome da peça",
+    "namePlaceholder": "Vestido midi de linho",
+    "nameRequired": "Link da loja é obrigatório",
+    "priceLabel": "Preço ({{symbol}})",
+    "priceRequired": "Preço é obrigatório",
+    "categoryLabel": "Categoria",
+    "newCategoryPlaceholder": "Nome da nova categoria",
+    "chooseCategoryPlaceholder": "Escolhe uma categoria",
+    "addCategory": "Adicionar categoria",
+    "categoryRequired": "Categoria é obrigatória",
+    "storeLabel": "Loja",
+    "storeRequired": "Nome da loja é obrigatório",
+    "imageUrlLabel": "URL da imagem",
+    "imageUrlPlaceholder": "Cole aqui a URL da imagem",
+    "imageUrlRequired": "URL da imagem é obrigatório",
+    "imagePreviewAlt": "Pré-visualização da imagem",
+    "submit": "Adicionar à wishlist",
+    "toasts": {
+      "updated": "Produto atualizado",
+      "added": "Produto adicionado",
+      "updateError": "Não consegui atualizar o produto",
+      "addError": "Não consegui adicionar o produto"
+    }
+  },
+  "linkField": {
+    "label": "Link da loja",
+    "required": "Link da loja é obrigatório",
+    "toasts": {
+      "notFound": "Não consegui buscar os dados desse produto",
+      "manualFallback": "Preencha os campos manualmente.",
+      "found": "Informações do produto encontradas"
+    }
+  },
+  "comments": {
+    "now": "agora",
+    "minutesAgo": "há {{count}} min",
+    "hoursAgo": "há {{count}}h",
+    "daysAgo": "há {{count}}d",
+    "loginPrompt": "para comentar.",
+    "login": "Faça login",
+    "placeholder": "Comentário...",
+    "submit": "Comentar"
+  },
+  "userMenu": {
+    "viewProfile": "Ver meu perfil",
+    "logout": "Sair"
+  }
+}

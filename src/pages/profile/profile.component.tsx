@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import type { Category, Product, SortOption, UserProfile } from '@/types';
 import AddProductDialog from '@/components/add-product-dialog/add-product-dialog.component';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -18,6 +19,8 @@ import {
 } from '@/firebase/firebase';
 import { refreshProduct, persistRefreshedProduct } from '@/lib/refresh-product';
 import { runWithConcurrency } from '@/lib/concurrency';
+import { ALL_CATEGORIES } from '@/lib/constants';
+import { useLocale } from '@/hooks/use-locale';
 import { Spinner } from '@/components/ui/spinner';
 import Categories from '@/components/categories/categories.component';
 import Options from '@/components/options/options.component';
@@ -28,12 +31,13 @@ import LinkField from '@/components/link-field/link-field.component';
 import SearchField from '@/components/search-field/search-field.component';
 import SortSelect from '@/components/sort-select/sort-select.component';
 
-const TUDO = 'Tudo';
 const PAGE_SIZE = 20;
 
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const { priceWithCurrency, path } = useLocale();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
@@ -50,14 +54,14 @@ export default function ProfilePage() {
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [refreshTick, setRefreshTick] = useState<number>(0);
   const [optionSelected, setOptionSelected] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>(TUDO);
+  const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES);
   const [product, setProduct] = useState<Product>();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [page, setPage] = useState<number>(1);
   const [lastFilterKey, setLastFilterKey] = useState<string>('');
   const [categoryBeforeDialog, setCategoryBeforeDialog] =
-    useState<string>(TUDO);
+    useState<string>(ALL_CATEGORIES);
   const [wasDialogOpen, setWasDialogOpen] = useState<boolean>(false);
 
   const isOwner = !!user && !!profile && user.uid === profile.uid;
@@ -138,7 +142,7 @@ export default function ProfilePage() {
 
     const filtered = products.filter((product) => {
       if (product.bought !== optionSelected) return false;
-      if (selectedCategory !== TUDO && product.category !== selectedCategory)
+      if (selectedCategory !== ALL_CATEGORIES && product.category !== selectedCategory)
         return false;
       if (query && !product.name.toLowerCase().includes(query)) return false;
       return true;
@@ -241,13 +245,6 @@ export default function ProfilePage() {
     setRefreshTick((tick) => tick + 1);
   };
 
-  const priceWithCurrency = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price);
-  };
-
   if (isProfileLoading) {
     return (
       <div className="flex items-center justify-center w-screen h-screen">
@@ -260,13 +257,11 @@ export default function ProfilePage() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
         <h1 className="font-heading text-2xl font-semibold text-primary">
-          Perfil não encontrado
+          {t('profile.notFoundTitle')}
         </h1>
-        <p className="text-muted-foreground">
-          Não existe nenhum usuário com esse nome.
-        </p>
-        <Link to="/" className="text-primary underline">
-          Voltar para o início
+        <p className="text-muted-foreground">{t('profile.notFoundText')}</p>
+        <Link to={path('/')} className="text-primary underline">
+          {t('profile.backHome')}
         </Link>
       </main>
     );
@@ -281,7 +276,7 @@ export default function ProfilePage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-6 border-b">
         <div className="flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5">
-            <img className="w-10" src="favicon.svg" />
+            <img className="w-10" src="/favicon.svg" />
             <div>
               <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary">
                 Choose a Club
@@ -295,9 +290,8 @@ export default function ProfilePage() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex flex-col items-end rounded-lg bg-accent px-4 py-2 self-start sm:self-auto">
             <p className="text-sm text-accent-foreground">
-              {productsView?.length}{' '}
-              {productsView?.length === 1 ? 'peça' : 'peças'}
-              {optionSelected ? ' compradas' : ' desejadas'}
+              {t('profile.productCount', { count: productsView?.length ?? 0 })}
+              {optionSelected ? t('profile.bought') : t('profile.wanted')}
             </p>
             <p className="text-lg font-semibold text-primary">
               {priceWithCurrency(
@@ -317,13 +311,13 @@ export default function ProfilePage() {
                 data-icon="inline-start"
                 className={isRefreshingPage ? 'animate-spin' : ''}
               />
-              Atualizar
+              {t('profile.refresh')}
             </Button>
             {isOwner && (
               <>
                 <Button size="lg" onClick={() => setOpen(true)}>
                   <IconPlus></IconPlus>
-                  Adicionar produto
+                  {t('profile.addProduct')}
                 </Button>
                 {open && (
                   <AddProductDialog
@@ -347,8 +341,8 @@ export default function ProfilePage() {
             {user ? (
               <UserMenu />
             ) : (
-              <Link to="/" className={buttonVariants({ size: 'lg' })}>
-                Entrar
+              <Link to={path('/')} className={buttonVariants({ size: 'lg' })}>
+                {t('common.login')}
               </Link>
             )}
           </div>
@@ -360,7 +354,7 @@ export default function ProfilePage() {
           selectedCategory={selectedCategory}
           selectCategory={selectCategory}
           categories={
-            categoryNames.length ? [TUDO, ...categoryNames] : categoryNames
+            categoryNames.length ? [ALL_CATEGORIES, ...categoryNames] : categoryNames
           }
         />
 
@@ -370,7 +364,7 @@ export default function ProfilePage() {
       {isOwner && (
         <div className="mb-6 mt-6">
           <LinkField
-            placeholder="Cole o link da peça aqui"
+            placeholder={t('profile.linkPlaceholder')}
             register={registerLink}
             errors={linkErrors}
             getValues={getLinkValues}
@@ -418,7 +412,7 @@ export default function ProfilePage() {
             <IconChevronLeft stroke={2} />
           </Button>
           <p className="text-sm text-muted-foreground">
-            Página {page} de {totalPages}
+            {t('profile.page', { page, totalPages })}
           </p>
           <Button
             variant="outline"

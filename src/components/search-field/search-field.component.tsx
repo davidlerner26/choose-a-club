@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { IconSearch } from '@tabler/icons-react';
 
@@ -8,6 +9,8 @@ export default function SearchField({
   searchQuery: string;
   setSearchQuery: (searchQuery: string) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative w-full sm:w-64">
       <IconSearch
@@ -16,7 +19,7 @@ export default function SearchField({
       />
       <Input
         type="search"
-        placeholder="Buscar peça..."
+        placeholder={t('search.placeholder')}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="pl-8"

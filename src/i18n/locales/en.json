@@ -1,0 +1,136 @@
+{
+  "common": {
+    "add": "Add",
+    "cancel": "Cancel",
+    "login": "Log in",
+    "logout": "Log out"
+  },
+  "login": {
+    "subtitle": "Save the products you love and never lose track of what you want to buy",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
+    "or": "or",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "emailRequired": "Email is required",
+    "password": "Password",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "signUp": "Create account",
+    "signIn": "Log in",
+    "hasAccount": "Already have an account?",
+    "noAccount": "Don't have an account yet?",
+    "errors": {
+      "emailInUse": "This email is already registered.",
+      "invalidEmail": "Invalid email.",
+      "weakPassword": "Password must be at least 6 characters.",
+      "wrongCredentials": "Incorrect email or password.",
+      "tooManyRequests": "Too many attempts. Try again later.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "chooseUsername": {
+    "title": "Choose your club's name",
+    "label": "Club name",
+    "required": "Club name is required",
+    "continue": "Continue",
+    "errors": {
+      "invalidFormat": "Use 3 to 20 lowercase letters, numbers, \".\" or \"_\", no spaces.",
+      "taken": "This username is already taken."
+    }
+  },
+  "profile": {
+    "notFoundTitle": "Profile not found",
+    "notFoundText": "There's no user with that name.",
+    "backHome": "Back to home",
+    "productCount_one": "{{count}} item",
+    "productCount_other": "{{count}} items",
+    "bought": " bought",
+    "wanted": " wanted",
+    "refresh": "Refresh",
+    "addProduct": "Add product",
+    "linkPlaceholder": "Paste the store link here",
+    "page": "Page {{page}} of {{totalPages}}"
+  },
+  "products": {
+    "unavailable": "Unavailable",
+    "priceUnknown": "price to be confirmed",
+    "viewInStore": "View in store",
+    "toasts": {
+      "bought": "Product marked as bought",
+      "boughtError": "Couldn't mark the product as bought",
+      "removed": "Product removed",
+      "removedError": "Couldn't remove the product"
+    }
+  },
+  "categories": {
+    "all": "All"
+  },
+  "options": {
+    "wanted": "Wanted",
+    "bought": "Already bought"
+  },
+  "search": {
+    "placeholder": "Search item..."
+  },
+  "sort": {
+    "placeholder": "Sort by",
+    "recent": "Most recent",
+    "priceAsc": "Lowest price",
+    "priceDesc": "Highest price"
+  },
+  "noProductsFound": {
+    "title": "The rack is empty",
+    "subtitle": "Saw something you loved? Just click Add product"
+  },
+  "addProductDialog": {
+    "title": "New item",
+    "description": "Paste the link, click Add and wait: we'll fetch the product info automatically.",
+    "nameLabel": "Item name",
+    "namePlaceholder": "Linen midi dress",
+    "nameRequired": "Store link is required",
+    "priceLabel": "Price ({{symbol}})",
+    "priceRequired": "Price is required",
+    "categoryLabel": "Category",
+    "newCategoryPlaceholder": "New category name",
+    "chooseCategoryPlaceholder": "Choose a category",
+    "addCategory": "Add category",
+    "categoryRequired": "Category is required",
+    "storeLabel": "Store",
+    "storeRequired": "Store name is required",
+    "imageUrlLabel": "Image URL",
+    "imageUrlPlaceholder": "Paste the image URL here",
+    "imageUrlRequired": "Image URL is required",
+    "imagePreviewAlt": "Image preview",
+    "submit": "Add to wishlist",
+    "toasts": {
+      "updated": "Product updated",
+      "added": "Product added",
+      "updateError": "Couldn't update the product",
+      "addError": "Couldn't add the product"
+    }
+  },
+  "linkField": {
+    "label": "Store link",
+    "required": "Store link is required",
+    "toasts": {
+      "notFound": "Couldn't fetch this product's info",
+      "manualFallback": "Fill in the fields manually.",
+      "found": "Product info found"
+    }
+  },
+  "comments": {
+    "now": "now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago",
+    "loginPrompt": "to comment.",
+    "login": "Log in",
+    "placeholder": "Comment...",
+    "submit": "Comment"
+  },
+  "userMenu": {
+    "viewProfile": "View my profile",
+    "logout": "Log out"
+  }
+}
