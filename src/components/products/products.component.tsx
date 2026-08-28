@@ -142,7 +142,7 @@ export default function Products({
                       )}
                     </div>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="rounded-b-none">
                     <div className="flex items-center justify-between w-full">
                       <div>
                         <a
@@ -196,6 +196,7 @@ export default function Products({
                     productId={id}
                     profileUserId={profileUserId}
                     currentUser={currentUser}
+                    className="-mt-4"
                   />
                 </Card>
               </li>

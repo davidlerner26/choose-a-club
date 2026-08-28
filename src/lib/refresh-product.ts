@@ -3,27 +3,19 @@ import { extractProduct } from '@/components/api/api';
 import { updateProduct } from '@/firebase/firebase';
 import type { Product } from '@/types';
 
-// mesmo id em todas as chamadas: se várias peças falharem numa mesma
-// atualização de página, aparece um único toast (atualizado), não uma pilha
-const REFRESH_ERROR_TOAST_ID = 'refresh-product-error';
-
+// A loja pode bloquear a leitura ou simplesmente não ser suportada pelo
+// scraper — isso é rotina num refresh em segundo plano, não um erro pro
+// usuário: só mantém o que já está salvo no Firebase, sem toast.
 export async function refreshProduct(product: Product): Promise<Product> {
   try {
     const fetched = await extractProduct(product.link);
     if ('manual' in fetched) {
-      toast.error('Não consegui atualizar um produto na loja', {
-        id: REFRESH_ERROR_TOAST_ID,
-        description: fetched.motivo || product.name,
-      });
+      console.error(fetched.motivo, product.link);
       return product;
     }
 
     return {
       ...product,
-      name: fetched.name || product.name,
-      store: fetched.store || product.store,
-      category: fetched.categoria || product.category,
-      url: fetched.imagem || product.url,
       price: fetched.price || product.price,
       priceFrom: fetched.precoDe ?? product.priceFrom,
       available:
@@ -33,10 +25,6 @@ export async function refreshProduct(product: Product): Promise<Product> {
     };
   } catch (error) {
     console.error(error);
-    toast.error('Não consegui atualizar um produto na loja', {
-      id: REFRESH_ERROR_TOAST_ID,
-      description: product.name,
-    });
     return product;
   }
 }
@@ -48,11 +36,7 @@ export async function persistRefreshedProduct(
   const changed =
     refreshed.price !== original.price ||
     refreshed.priceFrom !== original.priceFrom ||
-    refreshed.available !== original.available ||
-    refreshed.name !== original.name ||
-    refreshed.store !== original.store ||
-    refreshed.category !== original.category ||
-    refreshed.url !== original.url;
+    refreshed.available !== original.available;
   if (!changed) return;
 
   // Firestore's updateDoc() rejects explicit `undefined` values — omit
@@ -60,10 +44,6 @@ export async function persistRefreshedProduct(
   const updates: Partial<Product> = {
     price: refreshed.price,
     available: refreshed.available,
-    name: refreshed.name,
-    store: refreshed.store,
-    category: refreshed.category,
-    url: refreshed.url,
   };
   if (refreshed.priceFrom !== undefined) {
     updates.priceFrom = refreshed.priceFrom;

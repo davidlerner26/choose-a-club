@@ -12,6 +12,7 @@ import {
   deleteComment,
   getProductComments,
 } from '@/firebase/firebase';
+import { cn } from '@/lib/utils';
 import type { Comment } from '@/types';
 
 function initials(name?: string | null) {
@@ -43,10 +44,12 @@ export default function Comments({
   productId,
   profileUserId,
   currentUser,
+  className,
 }: {
   productId: string;
   profileUserId: string;
   currentUser: User | null;
+  className?: string;
 }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,7 +97,7 @@ export default function Comments({
   }
 
   return (
-    <div className="w-full space-y-3 border-t px-4 pt-3 pb-4">
+    <div className={cn('w-full space-y-3 border-t px-4 pt-3 pb-4', className)}>
       {isLoading ? (
         <div className="flex justify-center py-2">
           <Spinner className="size-4" />
@@ -151,8 +154,8 @@ export default function Comments({
           className="flex items-center gap-2"
         >
           <Input
-            placeholder="Escreva um comentário..."
-            className="h-8 text-sm"
+            placeholder="Deixe seu comentário"
+            className="h-8 min-w-0 flex-1 truncate text-sm"
             {...register('text', { required: true })}
           />
           <Button type="submit" size="sm" disabled={isSubmitting}>
