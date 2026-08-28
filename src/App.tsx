@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { Spinner } from '@/components/ui/spinner';
+import { Toaster } from '@/components/ui/sonner';
 import { useAuth } from './hooks/use-auth';
 import { useOwnProfile } from './hooks/use-own-profile';
 import ChooseUsernameDialog from './components/choose-username-dialog/choose-username-dialog.component';
@@ -21,14 +22,25 @@ export default function App() {
   }
 
   if (user && !profile) {
-    return <ChooseUsernameDialog user={user} onCreated={setProfile} />;
+    return (
+      <>
+        <ChooseUsernameDialog user={user} onCreated={setProfile} />
+        <Toaster />
+      </>
+    );
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<HomePage user={user} profile={profile} />} />
-      <Route path="/:username" element={<ProfilePage />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={<HomePage user={user} profile={profile} />}
+        />
+        <Route path="/:username" element={<ProfilePage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <Toaster />
+    </>
   );
 }

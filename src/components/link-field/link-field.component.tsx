@@ -6,6 +6,7 @@ import type {
 import { Field, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 import { Button } from '../ui/button';
 import type { Product } from '@/types';
 import { extractProduct } from '../api/api';
@@ -40,7 +41,11 @@ export default function LinkField({
       setIsLoading(true);
       try {
         const response = await extractProduct(link);
-        if (response && !('manual' in response)) {
+        if ('manual' in response) {
+          toast.error('Não consegui buscar os dados desse produto', {
+            description: response.motivo || 'Preencha os campos manualmente.',
+          });
+        } else {
           onProductFetched({
             id: crypto.randomUUID(),
             name: response.name ?? '',
@@ -51,9 +56,15 @@ export default function LinkField({
             category: response.categoria ?? '',
             priceFrom: response.precoDe,
           });
+          toast.success('Informações do produto encontradas', {
+            description: response.name,
+          });
         }
       } catch (error) {
         console.error(error);
+        toast.error('Não consegui buscar os dados desse produto', {
+          description: 'Preencha os campos manualmente.',
+        });
       } finally {
         setIsLoading(false);
       }

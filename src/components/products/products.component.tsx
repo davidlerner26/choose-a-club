@@ -1,4 +1,5 @@
 import type { User } from 'firebase/auth';
+import { toast } from 'sonner';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import NoProductsFound from '../no-products-found/no-products-found.component';
@@ -60,8 +61,17 @@ export default function Products({
       url,
       bought: true,
     };
-    await updateProduct(id, product);
-    await updateProducts();
+    try {
+      await updateProduct(id, product);
+      await updateProducts();
+      toast.success('Produto marcado como comprado');
+    } catch (error) {
+      console.error(error);
+      toast.error('Não consegui marcar o produto como comprado', {
+        description: name,
+      });
+      setIsLoading(false);
+    }
   };
 
   const editProduct = (id: string) => {
@@ -69,10 +79,17 @@ export default function Products({
     setOpen(true);
   };
 
-  const removeProduct = async (id: string) => {
+  const removeProduct = async (id: string, name: string) => {
     setIsLoading(true);
-    await deleteProduct(id);
-    await updateProducts();
+    try {
+      await deleteProduct(id);
+      await updateProducts();
+      toast.success('Produto removido');
+    } catch (error) {
+      console.error(error);
+      toast.error('Não consegui remover o produto', { description: name });
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -167,7 +184,7 @@ export default function Products({
                           <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => removeProduct(id)}
+                            onClick={() => removeProduct(id, name)}
                           >
                             <IconX stroke={2} />
                           </Button>

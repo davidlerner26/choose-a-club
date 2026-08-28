@@ -1,11 +1,22 @@
+import { toast } from 'sonner';
 import { extractProduct } from '@/components/api/api';
 import { updateProduct } from '@/firebase/firebase';
 import type { Product } from '@/types';
 
+// mesmo id em todas as chamadas: se várias peças falharem numa mesma
+// atualização de página, aparece um único toast (atualizado), não uma pilha
+const REFRESH_ERROR_TOAST_ID = 'refresh-product-error';
+
 export async function refreshProduct(product: Product): Promise<Product> {
   try {
     const fetched = await extractProduct(product.link);
-    if ('manual' in fetched) return product;
+    if ('manual' in fetched) {
+      toast.error('Não consegui atualizar um produto na loja', {
+        id: REFRESH_ERROR_TOAST_ID,
+        description: fetched.motivo || product.name,
+      });
+      return product;
+    }
 
     return {
       ...product,
@@ -22,6 +33,10 @@ export async function refreshProduct(product: Product): Promise<Product> {
     };
   } catch (error) {
     console.error(error);
+    toast.error('Não consegui atualizar um produto na loja', {
+      id: REFRESH_ERROR_TOAST_ID,
+      description: product.name,
+    });
     return product;
   }
 }
@@ -58,5 +73,9 @@ export async function persistRefreshedProduct(
     await updateProduct(refreshed.id, updates);
   } catch (error) {
     console.error(error);
+    toast.error('Não consegui salvar a atualização de um produto', {
+      id: 'persist-product-error',
+      description: refreshed.name,
+    });
   }
 }

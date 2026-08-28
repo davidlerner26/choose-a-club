@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { toast } from 'sonner';
 import type { Category, Product } from '@/types';
 import { createProduct, getProduct, updateProduct } from '@/firebase/firebase';
 import { useEffect, useState } from 'react';
@@ -104,13 +105,22 @@ export default function AddProductDialog({
       price: Number(data.price),
       bought: false,
     };
-    if (id) {
-      await updateProduct(id, product);
-    } else {
-      await createProduct(product);
+    try {
+      if (id) {
+        await updateProduct(id, product);
+      } else {
+        await createProduct(product);
+      }
+      resetFields(false);
+      await updateProducts();
+      toast.success(id ? 'Produto atualizado' : 'Produto adicionado');
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        id ? 'Não consegui atualizar o produto' : 'Não consegui adicionar o produto',
+        { description: product.name },
+      );
     }
-    resetFields(false);
-    await updateProducts();
   };
 
   const handleCreateCategory = async () => {
