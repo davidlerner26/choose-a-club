@@ -16,8 +16,12 @@ export async function refreshProduct(product: Product): Promise<Product> {
 
     return {
       ...product,
+      // a loja informa o preço em reais, então uma checagem bem-sucedida
+      // sempre reflete o preço real em BRL, mesmo que o produto tivesse
+      // sido salvo antes numa outra moeda
       price: fetched.price || product.price,
       priceFrom: fetched.precoDe ?? product.priceFrom,
+      currency: 'BRL',
       available:
         typeof fetched.disponivel === 'boolean'
           ? fetched.disponivel
@@ -36,13 +40,15 @@ export async function persistRefreshedProduct(
   const changed =
     refreshed.price !== original.price ||
     refreshed.priceFrom !== original.priceFrom ||
-    refreshed.available !== original.available;
+    refreshed.available !== original.available ||
+    refreshed.currency !== (original.currency ?? 'BRL');
   if (!changed) return;
 
   // Firestore's updateDoc() rejects explicit `undefined` values — omit
   // priceFrom entirely instead of sending it as undefined.
   const updates: Partial<Product> = {
     price: refreshed.price,
+    currency: refreshed.currency,
     available: refreshed.available,
   };
   if (refreshed.priceFrom !== undefined) {

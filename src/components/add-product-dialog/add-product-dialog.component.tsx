@@ -40,6 +40,7 @@ import { useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import { IconPlus } from '@tabler/icons-react';
 import { useLocale } from '@/hooks/use-locale';
+import { CURRENCY_SYMBOLS, type Currency } from '@/i18n/locales';
 import { ALL_CATEGORIES } from '@/lib/constants';
 import LinkField from '../link-field/link-field.component';
 
@@ -69,9 +70,14 @@ export default function AddProductDialog({
   selectedCategory?: string;
 }) {
   const { t } = useTranslation();
-  const { formatPrice, currencySymbol } = useLocale();
+  const { formatPrice, currency: localeCurrency } = useLocale();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [priceDisplay, setPriceDisplay] = useState<string>(formatPrice(0));
+  // moeda em que o preço deste formulário está sendo digitado: ao editar,
+  // segue a moeda já salva do produto; ao criar do zero, usa a do locale
+  // atual; quando o link é colado e a API busca o preço, é sempre BRL (a
+  // loja informa o preço em reais).
+  const [formCurrency, setFormCurrency] = useState<Currency>(localeCurrency);
   const [isAddingCategory, setIsAddingCategory] = useState<boolean>(false);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
   const [isSavingCategory, setIsSavingCategory] = useState<boolean>(false);
@@ -101,6 +107,7 @@ export default function AddProductDialog({
       ...data,
       category,
       price: Number(data.price),
+      currency: formCurrency,
       bought: false,
     };
     try {
@@ -154,11 +161,12 @@ export default function AddProductDialog({
       setProduct?.(undefined);
       reset();
       setPriceDisplay(formatPrice(0));
+      setFormCurrency(localeCurrency);
     }
   };
 
   const setFieldsDefaultValues = (product: Product) => {
-    const { link, name, price, category, store, url } = product;
+    const { link, name, price, category, store, url, currency } = product;
     reset({
       link: link || '',
       name: name || '',
@@ -168,6 +176,7 @@ export default function AddProductDialog({
       url: url || '',
     });
     setPriceDisplay(formatPrice(Math.round((price || 0) * 100)));
+    setFormCurrency(currency ?? 'BRL');
   };
 
   useEffect(() => {
@@ -214,6 +223,7 @@ export default function AddProductDialog({
                   setValue('name', product.name);
                   setValue('price', product.price);
                   setPriceDisplay(formatPrice(Math.round(product.price * 100)));
+                  setFormCurrency('BRL');
                   setValue('category', product.category);
                   setValue('store', product.store);
                   setValue('url', product.url);
@@ -233,7 +243,9 @@ export default function AddProductDialog({
               </Field>
               <Field>
                 <Label htmlFor="price">
-                  {t('addProductDialog.priceLabel', { symbol: currencySymbol })}
+                  {t('addProductDialog.priceLabel', {
+                    symbol: CURRENCY_SYMBOLS[formCurrency],
+                  })}
                 </Label>
                 <Controller
                   name="price"

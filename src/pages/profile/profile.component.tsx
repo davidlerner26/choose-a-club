@@ -37,7 +37,7 @@ export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
   const { t } = useTranslation();
-  const { priceWithCurrency, path } = useLocale();
+  const { priceWithCurrency, convertPrice, currency, path } = useLocale();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
@@ -296,8 +296,9 @@ export default function ProfilePage() {
             <p className="text-lg font-semibold text-primary">
               {priceWithCurrency(
                 productsView?.reduce((acc, product) => {
-                  return acc + product.price;
+                  return acc + convertPrice(product.price, product.currency);
                 }, 0),
+                currency,
               )}
             </p>
           </div>

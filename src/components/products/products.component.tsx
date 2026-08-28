@@ -12,6 +12,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import { deleteProduct, updateProduct } from '@/firebase/firebase';
+import type { Currency } from '@/i18n/locales';
 import type { Product } from '@/types';
 import Comments from '../comments/comments.component';
 
@@ -27,7 +28,7 @@ export default function Products({
   currentUser,
   isRefreshingProducts,
 }: {
-  priceWithCurrency: (price: number) => string;
+  priceWithCurrency: (price: number, sourceCurrency?: Currency) => string;
   updateProducts: () => Promise<void>;
   setIsLoading: (isLoading: boolean) => void;
   setId: (id: string) => void;
@@ -105,6 +106,7 @@ export default function Products({
               name,
               price,
               priceFrom,
+              currency,
               link,
               store,
               category,
@@ -134,12 +136,12 @@ export default function Products({
                     <div className="flex items-center gap-2">
                       <p className="text-primary font-semibold">
                         {price
-                          ? priceWithCurrency(price)
+                          ? priceWithCurrency(price, currency)
                           : t('products.priceUnknown')}
                       </p>
                       {priceFrom && priceFrom > price && (
                         <p className="text-sm text-muted-foreground line-through">
-                          {priceWithCurrency(priceFrom)}
+                          {priceWithCurrency(priceFrom, currency)}
                         </p>
                       )}
                       {available === false && (

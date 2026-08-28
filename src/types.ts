@@ -1,8 +1,13 @@
+import type { Currency } from '@/i18n/locales';
+
 export type Product = {
   id: string;
   name: string;
   price: number;
   priceFrom?: number;
+  // ausente = produto antigo, salvo antes de existir esse campo — trate
+  // como BRL (é a moeda que sempre foi usada até aqui).
+  currency?: Currency;
   link: string;
   category: string;
   store: string;

@@ -1,9 +1,18 @@
 export type LocaleCode = 'pt-BR' | 'en_us' | 'en_gb' | 'en_eu';
 
+export type Currency = 'BRL' | 'USD' | 'GBP' | 'EUR';
+
+export const CURRENCY_SYMBOLS: Record<Currency, string> = {
+  BRL: 'R$',
+  USD: '$',
+  GBP: '£',
+  EUR: '€',
+};
+
 export type LocaleConfig = {
   code: LocaleCode;
   language: 'pt-BR' | 'en';
-  currency: 'BRL' | 'USD' | 'GBP' | 'EUR';
+  currency: Currency;
   currencySymbol: string;
   numberLocale: string;
   urlPrefix: string | null;
