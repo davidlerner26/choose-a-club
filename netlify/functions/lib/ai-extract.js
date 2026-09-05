@@ -1,7 +1,8 @@
 // netlify/functions/lib/ai-extract.js
-// Fallback de IA: quando VTEX/JSON-LD/Open Graph não encontram o produto,
-// manda um resumo compacto do HTML já buscado (sem novo fetch) pro Claude
-// Haiku extrair os mesmos campos.
+// Fallback de IA: quando VTEX/JSON-LD/Open Graph não encontram o produto (ou
+// encontram só uma parte — falta preço, imagem etc.), manda um resumo
+// compacto do HTML já buscado (sem novo fetch) pro Claude Haiku completar os
+// mesmos campos.
 
 import Anthropic from '@anthropic-ai/sdk';
 import { CATEGORIAS_VALIDAS, classificar } from './categorias.js';
@@ -58,6 +59,25 @@ function extrairJsonLdBruto(html) {
   return blocos;
 }
 
+// URLs de <img src> da página — sem isso, uma loja sem og:image/JSON-LD
+// nunca teria como a IA achar a foto do produto, já que extrairTextoVisivel
+// remove todas as tags (e com elas, os atributos src)
+function extrairImagensCandidatas(html, base) {
+  const re = /<img\s[^>]*?src\s*=\s*["']([^"']+)["'][^>]*>/gi;
+  const vistas = new Set();
+  let m;
+  while ((m = re.exec(html)) !== null && vistas.size < 20) {
+    const src = m[1];
+    if (!src || src.startsWith('data:')) continue;
+    try {
+      vistas.add(new URL(src, base).href);
+    } catch {
+      // ignora src inválido
+    }
+  }
+  return [...vistas];
+}
+
 // último recurso: texto visível da página, pra lojas sem OG nem JSON-LD
 function extrairTextoVisivel(html) {
   const texto = html
@@ -86,6 +106,7 @@ function montarContexto(html, base) {
     titulo: extrairTitulo(html),
     metas: extrairMetasRelevantes(html),
     jsonLd: extrairJsonLdBruto(html),
+    imagensCandidatas: extrairImagensCandidatas(html, base),
     textoVisivel: extrairTextoVisivel(html),
   };
 }
@@ -122,9 +143,18 @@ const TOOL = {
       imagem: {
         type: ['string', 'null'],
         description:
-          'URL absoluta da imagem principal do produto, copiada literalmente do conteúdo',
+          'URL absoluta da imagem principal do produto — escolhida entre as ' +
+          'URLs de "imagensCandidatas" ou das metas fornecidas, nunca outra ' +
+          'URL inventada',
       },
-      disponivel: { type: ['boolean', 'null'] },
+      disponivel: {
+        type: ['boolean', 'null'],
+        description:
+          'true/false se houver algum sinal claro no conteúdo (ex.: "esgotado", ' +
+          '"sold out", "fora de estoque", "avise-me quando chegar" indicam false; ' +
+          '"em estoque", botão de comprar/adicionar ao carrinho indicam true). ' +
+          'Use null se não houver nenhum sinal.',
+      },
       moeda: {
         type: ['string', 'null'],
         enum: [...MOEDAS_VALIDAS, null],
@@ -208,4 +238,41 @@ export async function tentarIA(html, base) {
   } catch {
     return null;
   }
+}
+
+// true se falta alguma info central que o extract.js deveria ter pego
+// (precoDe fica de fora de propósito: a maioria dos produtos não está em
+// promoção, então "sem precoDe" não é uma falha de extração)
+export function faltaInfo(resultado) {
+  return (
+    !resultado ||
+    !resultado.nome ||
+    !resultado.imagem ||
+    !resultado.preco ||
+    typeof resultado.disponivel !== 'boolean'
+  );
+}
+
+// preenche só os buracos do resultado das estratégias rápidas (VTEX/JSON-LD/
+// Open Graph) com o que a IA achou — nunca sobrescreve um dado que a
+// estratégia rápida já tinha encontrado
+export function mesclarComIA(resultado, ia) {
+  return {
+    ...resultado,
+    nome: resultado.nome || ia.nome,
+    marca: resultado.marca || ia.marca,
+    categoria:
+      resultado.categoria && resultado.categoria !== 'Outros'
+        ? resultado.categoria
+        : ia.categoria || resultado.categoria,
+    categoriaLoja: resultado.categoriaLoja || ia.categoriaLoja,
+    preco: resultado.preco ?? ia.preco,
+    precoDe: resultado.precoDe ?? ia.precoDe,
+    imagem: resultado.imagem || ia.imagem,
+    disponivel:
+      typeof resultado.disponivel === 'boolean'
+        ? resultado.disponivel
+        : ia.disponivel,
+    moeda: resultado.moeda ?? ia.moeda,
+  };
 }

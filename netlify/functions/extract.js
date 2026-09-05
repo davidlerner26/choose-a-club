@@ -3,10 +3,11 @@
 // Estratégia: 1) API pública VTEX (Farm, Animale, Shoulder e boa parte do varejo BR)
 //             2) JSON-LD schema.org/Product
 //             3) meta tags Open Graph
-//             4) IA (fallback final, quando nada acima encontrou o produto)
+//             4) IA — completa o que faltou (nome/preço/imagem) nas estratégias
+//                acima, ou faz a extração inteira se nenhuma delas achou nada
 
 import { classificar, categoriaBruta } from './lib/categorias.js';
-import { tentarIA } from './lib/ai-extract.js';
+import { tentarIA, faltaInfo, mesclarComIA } from './lib/ai-extract.js';
 
 const UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
@@ -236,10 +237,16 @@ function lerJsonLd(html, base) {
     if (Array.isArray(img)) img = img[0];
     if (img && typeof img === 'object') img = img.url || img.contentUrl;
 
-    const disponivel = listaOfertas.some((oferta) => {
-      const disp = String((oferta || {}).availability || '').toLowerCase();
-      return disp ? !disp.includes('outofstock') && !disp.includes('soldout') : true;
-    });
+    // sem nenhuma oferta, não dá pra saber se está disponível — deixa null
+    // pra IA tentar achar um sinal no texto da página, em vez de chutar true
+    const disponivel = listaOfertas.length
+      ? listaOfertas.some((oferta) => {
+          const disp = String((oferta || {}).availability || '').toLowerCase();
+          return disp
+            ? !disp.includes('outofstock') && !disp.includes('soldout')
+            : true;
+        })
+      : null;
 
     return {
       nome: typeof p.name === 'string' ? p.name : null,
@@ -294,7 +301,9 @@ function lerMetas(html, base) {
     preco: parsePreco(preco),
     precoDe: null,
     imagem: absolutizar(img, base),
-    disponivel: disp ? !disp.includes('out') : true,
+    // sem a meta product:availability não dá pra saber — null (não "true"
+    // por padrão), pra IA ter a chance de achar um sinal no texto da página
+    disponivel: disp ? !disp.includes('out') : null,
     fonte: 'open-graph',
   };
 }
@@ -325,8 +334,25 @@ export const handler = async (event) => {
 
   // 1) VTEX
   try {
-    const vtex = await tentarVtex(alvo);
-    if (vtex && vtex.nome) return json({ ...vtex, loja, link: alvo });
+    let vtex = await tentarVtex(alvo);
+    if (vtex && vtex.nome) {
+      // a API da VTEX às vezes não traz preço/imagem (ex: SKU sem oferta
+      // ativa) — nesse caso busca o HTML da própria página e pede o que
+      // faltou pra IA, antes de devolver um resultado incompleto
+      if (faltaInfo(vtex)) {
+        try {
+          const r = await buscar(alvo, { headers: HEADERS_NAVEGADOR });
+          if (r.ok) {
+            const html = await r.text();
+            const ia = await tentarIA(html, u.origin);
+            if (ia) vtex = mesclarComIA(vtex, ia);
+          }
+        } catch {
+          // mantém o que a VTEX já tinha
+        }
+      }
+      return json({ ...vtex, loja, link: alvo });
+    }
   } catch (e) {
     // segue para o HTML
   }
@@ -360,13 +386,24 @@ export const handler = async (event) => {
   }
 
   const base = u.origin;
-  const resultado = lerJsonLd(html, base) || lerMetas(html, base);
+  let resultado = lerJsonLd(html, base) || lerMetas(html, base);
+
+  // completa buracos com o Open Graph
+  if (resultado && resultado.fonte === 'json-ld') {
+    const og = lerMetas(html, base) || {};
+    resultado.nome = resultado.nome || og.nome;
+    resultado.imagem = resultado.imagem || og.imagem;
+    resultado.preco = resultado.preco ?? og.preco;
+  }
+
+  // 4) qualquer info que ainda faltar (ou tudo, se nada acima achou o
+  // produto) é pedida pra IA, reaproveitando o HTML já buscado
+  if (faltaInfo(resultado)) {
+    const ia = await tentarIA(html, base);
+    if (ia) resultado = resultado ? mesclarComIA(resultado, ia) : ia;
+  }
 
   if (!resultado || (!resultado.nome && !resultado.imagem)) {
-    // 4) último recurso: manda o HTML já buscado pra IA antes de desistir
-    const ia = await tentarIA(html, base);
-    if (ia) return json({ ...ia, loja, link: alvo });
-
     return json(
       {
         erro: 'Não encontrei os dados do produto nessa página.',
@@ -376,14 +413,6 @@ export const handler = async (event) => {
       },
       200,
     );
-  }
-
-  // completa buracos com o Open Graph
-  if (resultado.fonte === 'json-ld') {
-    const og = lerMetas(html, base) || {};
-    resultado.nome = resultado.nome || og.nome;
-    resultado.imagem = resultado.imagem || og.imagem;
-    resultado.preco = resultado.preco ?? og.preco;
   }
 
   return json({ ...resultado, loja, link: alvo });
