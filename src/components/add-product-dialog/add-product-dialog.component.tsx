@@ -75,8 +75,8 @@ export default function AddProductDialog({
   const [priceDisplay, setPriceDisplay] = useState<string>(formatPrice(0));
   // moeda em que o preço deste formulário está sendo digitado: ao editar,
   // segue a moeda já salva do produto; ao criar do zero, usa a do locale
-  // atual; quando o link é colado e a API busca o preço, é sempre BRL (a
-  // loja informa o preço em reais).
+  // atual; quando o link é colado e a API busca o preço, usa a moeda que a
+  // extração detectou (cai em BRL se a extração não informar nenhuma).
   const [formCurrency, setFormCurrency] = useState<Currency>(localeCurrency);
   const [isAddingCategory, setIsAddingCategory] = useState<boolean>(false);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
@@ -223,7 +223,7 @@ export default function AddProductDialog({
                   setValue('name', product.name);
                   setValue('price', product.price);
                   setPriceDisplay(formatPrice(Math.round(product.price * 100)));
-                  setFormCurrency('BRL');
+                  setFormCurrency(product.currency ?? 'BRL');
                   setValue('category', product.category);
                   setValue('store', product.store);
                   setValue('url', product.url);

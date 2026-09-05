@@ -16,12 +16,12 @@ export async function refreshProduct(product: Product): Promise<Product> {
 
     return {
       ...product,
-      // a loja informa o preço em reais, então uma checagem bem-sucedida
-      // sempre reflete o preço real em BRL, mesmo que o produto tivesse
-      // sido salvo antes numa outra moeda
       price: fetched.price || product.price,
       priceFrom: fetched.precoDe ?? product.priceFrom,
-      currency: 'BRL',
+      // a extração normalmente vem em BRL (heurísticas VTEX/JSON-LD/OG não
+      // detectam moeda); só usa outra moeda quando o fallback de IA
+      // efetivamente identificou uma
+      currency: fetched.currency ?? 'BRL',
       available:
         typeof fetched.disponivel === 'boolean'
           ? fetched.disponivel

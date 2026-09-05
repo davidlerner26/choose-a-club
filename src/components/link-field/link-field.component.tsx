@@ -58,6 +58,7 @@ export default function LinkField({
             link: response.link,
             category: response.categoria ?? '',
             priceFrom: response.precoDe,
+            currency: response.currency,
           });
           toast.success(t('linkField.toasts.found'), {
             description: response.name,

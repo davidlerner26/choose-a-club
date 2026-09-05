@@ -3,6 +3,10 @@
 // Estratégia: 1) API pública VTEX (Farm, Animale, Shoulder e boa parte do varejo BR)
 //             2) JSON-LD schema.org/Product
 //             3) meta tags Open Graph
+//             4) IA (fallback final, quando nada acima encontrou o produto)
+
+import { classificar, categoriaBruta } from './lib/categorias.js';
+import { tentarIA } from './lib/ai-extract.js';
 
 const UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
@@ -29,7 +33,9 @@ function json(body, status = 200) {
 
 async function buscar(url, opts = {}) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 12000);
+  // orçamento apertado: a function tem 10s de teto e o fallback de IA
+  // (quando chega a ser chamado) ainda precisa da sua fatia desse tempo
+  const t = setTimeout(() => ctrl.abort(), 6500);
   try {
     return await fetch(url, {
       ...opts,
@@ -67,128 +73,6 @@ function absolutizar(src, base) {
   } catch {
     return null;
   }
-}
-
-// ---------- categorias ----------
-// Cada loja nomeia do seu jeito ("Vestido", "Vestidos", "Dresses"), e ainda
-// mistura categoria comercial ("bazar farm"). Aqui traduzimos para as abas do site.
-const REGRAS_CATEGORIA = [
-  ['Vestidos', ['vestido', 'chemise', 'tubinho']],
-  ['Saias', ['saia']],
-  [
-    'Calcas',
-    [
-      'calca',
-      'jeans',
-      'short',
-      'bermuda',
-      'legging',
-      'pantalona',
-      'pantacourt',
-    ],
-  ],
-  [
-    'Casacos',
-    [
-      'casaco',
-      'jaqueta',
-      'blazer',
-      'cardiga',
-      'sobretudo',
-      'parka',
-      'trench',
-      'colete',
-      'kimono',
-    ],
-  ],
-  [
-    'Blusas',
-    [
-      'blusa',
-      'camisa',
-      'camiseta',
-      'cropped',
-      'regata',
-      'body',
-      'moletom',
-      'trico',
-      'sueter',
-      'tops?\\b',
-    ],
-  ],
-  [
-    'Sapatos',
-    [
-      'sapato',
-      'tenis',
-      'sandalia',
-      'bota',
-      'rasteira',
-      'mule',
-      'chinelo',
-      'sapatilha',
-      'calcado',
-      'salto',
-    ],
-  ],
-  [
-    'Bolsas',
-    ['bolsa', 'mochila', 'clutch', 'carteira', 'necessaire', 'pochete'],
-  ],
-  [
-    'Acessorios',
-    [
-      'acessorio',
-      'colar',
-      'brinco',
-      'anel',
-      'pulseira',
-      'cinto',
-      'lenco',
-      'chapeu',
-      'oculos',
-      'bijou',
-      'echarpe',
-      'presilha',
-      'meia',
-    ],
-  ],
-  ['Perucas', ['peruca', 'aplique', 'cabelo']],
-  ['Brinquedos', ['brinquedo', 'pelucia', 'boneca']],
-  ['Jogos', ['jogo', 'quebra-cabeca', 'tabuleiro']],
-];
-
-// nomes com acento, como aparecem nas abas do site
-const ROTULOS = { Calcas: 'Calças', Acessorios: 'Acessórios' };
-
-function semAcento(s) {
-  return String(s || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-}
-
-// pega o nível mais específico do caminho de categorias da loja
-function categoriaBruta(caminhos) {
-  if (!Array.isArray(caminhos) || !caminhos.length) return null;
-  const maisFundo = caminhos
-    .map((c) => String(c).split('/').filter(Boolean))
-    .sort((a, b) => b.length - a.length)[0];
-  return maisFundo && maisFundo.length ? maisFundo[maisFundo.length - 1] : null;
-}
-
-// classifica pela categoria da loja; se não bater, tenta pelo nome do produto
-function classificar(...textos) {
-  for (const texto of textos) {
-    const t = semAcento(texto);
-    if (!t) continue;
-    for (const [destino, chaves] of REGRAS_CATEGORIA) {
-      if (chaves.some((k) => new RegExp('\\b' + k).test(t))) {
-        return ROTULOS[destino] || destino;
-      }
-    }
-  }
-  return 'Outros';
 }
 
 // ---------- 1) VTEX ----------
@@ -479,6 +363,10 @@ export const handler = async (event) => {
   const resultado = lerJsonLd(html, base) || lerMetas(html, base);
 
   if (!resultado || (!resultado.nome && !resultado.imagem)) {
+    // 4) último recurso: manda o HTML já buscado pra IA antes de desistir
+    const ia = await tentarIA(html, base);
+    if (ia) return json({ ...ia, loja, link: alvo });
+
     return json(
       {
         erro: 'Não encontrei os dados do produto nessa página.',

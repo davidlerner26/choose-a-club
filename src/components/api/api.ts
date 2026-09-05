@@ -1,3 +1,5 @@
+import type { Currency } from '@/i18n/locales';
+
 export type ExtractedProduct = {
   id: string;
   name: string;
@@ -11,6 +13,7 @@ export type ExtractedProduct = {
   adicionadoEm: string;
   verificadoEm: string;
   categoria?: string;
+  currency?: Currency;
 };
 
 export type ExtractionFailure = {
@@ -47,5 +50,6 @@ export const extractProduct = async (
     adicionadoEm: new Date().toISOString(),
     verificadoEm: new Date().toISOString(),
     categoria: d.categoria,
+    currency: d.moeda || undefined,
   };
 };

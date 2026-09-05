@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Local env vars (ANTHROPIC_API_KEY etc.) for `netlify dev`
+.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
