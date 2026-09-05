@@ -13,7 +13,6 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import {
-  signInWithApple,
   signInWithEmail,
   signInWithGoogle,
   signUpWithEmail,
@@ -39,19 +38,6 @@ function GoogleIcon() {
         fill="#EA4335"
         d="M12 4.77c1.76 0 3.34.6 4.58 1.79l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.25 6.63l4.02 3.1C6.22 6.88 8.87 4.77 12 4.77Z"
       />
-    </svg>
-  );
-}
-
-function AppleIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="size-4"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.88-1.99 1.56-2.987 1.56-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.31-2.383 4.02 0 3.21 2.856 4.34 2.955 4.37z" />
     </svg>
   );
 }
@@ -87,7 +73,6 @@ export default function LoginPage() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isAppleLoading, setIsAppleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -105,18 +90,6 @@ export default function LoginPage() {
       setError(firebaseErrorMessage(err));
     } finally {
       setIsGoogleLoading(false);
-    }
-  };
-
-  const handleAppleSignIn = async () => {
-    setIsAppleLoading(true);
-    setError(null);
-    try {
-      await signInWithApple();
-    } catch (err) {
-      setError(firebaseErrorMessage(err));
-    } finally {
-      setIsAppleLoading(false);
     }
   };
 
@@ -156,23 +129,12 @@ export default function LoginPage() {
           <Button
             variant="outline"
             size="lg"
-            className="w-full mb-3"
+            className="w-full mb-6"
             onClick={handleGoogleSignIn}
-            disabled={isGoogleLoading || isAppleLoading || isSubmitting}
+            disabled={isGoogleLoading || isSubmitting}
           >
             {isGoogleLoading ? <Spinner className="size-4" /> : <GoogleIcon />}
             {t('login.continueWithGoogle')}
-          </Button>
-
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full mb-6"
-            onClick={handleAppleSignIn}
-            disabled={isGoogleLoading || isAppleLoading || isSubmitting}
-          >
-            {isAppleLoading ? <Spinner className="size-4" /> : <AppleIcon />}
-            {t('login.continueWithApple')}
           </Button>
 
           <FieldSeparator className="mb-2">{t('login.or')}</FieldSeparator>
@@ -212,7 +174,7 @@ export default function LoginPage() {
                 type="submit"
                 size="lg"
                 className="w-full"
-                disabled={isSubmitting || isGoogleLoading || isAppleLoading}
+                disabled={isSubmitting || isGoogleLoading}
               >
                 {isSubmitting && <Spinner className="size-4" />}
                 {mode === 'signup' ? t('login.signUp') : t('login.signIn')}

@@ -18,7 +18,6 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
   GoogleAuthProvider,
-  OAuthProvider,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -43,16 +42,9 @@ export const db = getFirestore(app);
 // Auth
 export const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
-const appleProvider = new OAuthProvider('apple.com');
-appleProvider.addScope('email');
-appleProvider.addScope('name');
 
 export async function signInWithGoogle() {
   return await signInWithPopup(auth, googleProvider);
-}
-
-export async function signInWithApple() {
-  return await signInWithPopup(auth, appleProvider);
 }
 
 export async function signInWithEmail(email: string, password: string) {
