@@ -190,6 +190,7 @@ function precoValido(v) {
 }
 
 export async function tentarIA(html, base) {
+  console.log('tentanto ia', html, base);
   if (!process.env.ANTHROPIC_API_KEY) return null;
 
   try {
@@ -231,7 +232,8 @@ export async function tentarIA(html, base) {
       preco: precoValido(dados.preco),
       precoDe: precoValido(dados.precoDe),
       imagem,
-      disponivel: typeof dados.disponivel === 'boolean' ? dados.disponivel : true,
+      disponivel:
+        typeof dados.disponivel === 'boolean' ? dados.disponivel : true,
       moeda: MOEDAS_VALIDAS.includes(dados.moeda) ? dados.moeda : null,
       fonte: 'ai',
     };

@@ -309,6 +309,8 @@ function lerMetas(html, base) {
 }
 
 export const handler = async (event) => {
+  console.log('handler', event);
+
   if (event.httpMethod === 'OPTIONS') return json({ ok: true });
 
   let alvo = (event.queryStringParameters || {}).url;
