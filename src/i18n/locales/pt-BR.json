@@ -156,9 +156,12 @@
     "seeAll": "Ver wishlist completa"
   },
   "alerts": {
-    "subtitle": "Produtos da sua wishlist que já baixaram de preço.",
-    "emptyTitle": "Nenhum alerta por enquanto",
-    "emptySubtitle": "Quando um produto da sua wishlist cair de preço, ele aparece aqui."
+    "subtitle": "Alertas de preço que você criou.",
+    "emptyTitle": "Nenhum alerta criado",
+    "emptySubtitle": "Abra um produto e clique em \"Criar alerta de preço\" pra ser avisado quando o preço cair.",
+    "targetLabel": "Alvo: {{price}}",
+    "currentLabel": "Atual: {{price}}",
+    "cancel": "Cancelar alerta"
   },
   "explore": {
     "subtitle": "Descubra as wishlists de outras pessoas.",
@@ -176,6 +179,17 @@
     "originalPrice": "Preço original",
     "goodPrice": "Bom preço",
     "goodPriceDescription": "Esse preço está {{percent}}% mais barato que o original.",
-    "trend": "Variação de preço"
+    "trend": "Variação de preço",
+    "createAlert": "Criar alerta de preço",
+    "targetPriceLabel": "Avisar quando o preço for de ou menos",
+    "confirmAlert": "Confirmar alerta",
+    "activeAlert": "Avisaremos quando ficar {{price}} ou menos",
+    "cancelAlert": "Cancelar alerta",
+    "toasts": {
+      "created": "Alerta de preço criado",
+      "createdError": "Não consegui criar o alerta",
+      "cancelled": "Alerta cancelado",
+      "cancelledError": "Não consegui cancelar o alerta"
+    }
   }
 }

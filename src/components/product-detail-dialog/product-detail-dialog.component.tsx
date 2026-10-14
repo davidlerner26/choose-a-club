@@ -11,11 +11,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { IconCheck, IconEdit, IconExternalLink, IconX } from '@tabler/icons-react';
 import PriceTrendChart from '@/components/price-trend-chart/price-trend-chart.component';
+import PriceAlertSection from '@/components/price-alert-section/price-alert-section.component';
 import type { Currency } from '@/i18n/locales';
 import type { Product } from '@/types';
 
 export default function ProductDetailDialog({
   product,
+  profileUserId,
   open,
   onOpenChange,
   priceWithCurrency,
@@ -25,6 +27,7 @@ export default function ProductDetailDialog({
   onRemove,
 }: {
   product: Product | null;
+  profileUserId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   priceWithCurrency: (price: number, sourceCurrency?: Currency) => string;
@@ -87,6 +90,15 @@ export default function ProductDetailDialog({
             </p>
             <PriceTrendChart from={hasDrop ? priceFrom! : price} to={price} />
           </div>
+        )}
+        {isOwner && !bought && (
+          <PriceAlertSection
+            uid={profileUserId}
+            productId={id}
+            currentPrice={price}
+            currency={currency}
+            priceWithCurrency={priceWithCurrency}
+          />
         )}
         <DialogFooter className="sm:justify-between">
           <a

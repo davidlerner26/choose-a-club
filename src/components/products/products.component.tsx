@@ -13,6 +13,7 @@ import type { Product } from '@/types';
 import Comments from '../comments/comments.component';
 import ProductDetailDialog from '../product-detail-dialog/product-detail-dialog.component';
 import PriceTrendChart from '../price-trend-chart/price-trend-chart.component';
+import PriceAlertSection from '../price-alert-section/price-alert-section.component';
 
 export default function Products({
   priceWithCurrency,
@@ -181,6 +182,17 @@ export default function Products({
                         className="mt-2 h-10"
                       />
                     )}
+                    {isOwner && !bought && (
+                      <div className="mt-3">
+                        <PriceAlertSection
+                          uid={profileUserId}
+                          productId={id}
+                          currentPrice={price}
+                          currency={currency}
+                          priceWithCurrency={priceWithCurrency}
+                        />
+                      </div>
+                    )}
                   </CardContent>
                   <CardFooter className="flex-col items-stretch gap-2 rounded-b-none">
                     <a
@@ -248,6 +260,7 @@ export default function Products({
       )}
       <ProductDetailDialog
         product={detailProduct}
+        profileUserId={profileUserId}
         open={!!detailProduct}
         onOpenChange={(open) => !open && setDetailProduct(null)}
         priceWithCurrency={priceWithCurrency}

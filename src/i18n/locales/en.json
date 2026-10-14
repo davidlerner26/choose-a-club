@@ -156,9 +156,12 @@
     "seeAll": "See full wishlist"
   },
   "alerts": {
-    "subtitle": "Items from your wishlist that already dropped in price.",
-    "emptyTitle": "No alerts yet",
-    "emptySubtitle": "When an item on your wishlist drops in price, it shows up here."
+    "subtitle": "Price alerts you've created.",
+    "emptyTitle": "No alerts created yet",
+    "emptySubtitle": "Open a product and click \"Create price alert\" to be notified when the price drops.",
+    "targetLabel": "Target: {{price}}",
+    "currentLabel": "Current: {{price}}",
+    "cancel": "Cancel alert"
   },
   "explore": {
     "subtitle": "Discover other people's wishlists.",
@@ -176,6 +179,17 @@
     "originalPrice": "Original price",
     "goodPrice": "Good price",
     "goodPriceDescription": "This price is {{percent}}% cheaper than the original.",
-    "trend": "Price trend"
+    "trend": "Price trend",
+    "createAlert": "Create price alert",
+    "targetPriceLabel": "Notify me when the price is at or below",
+    "confirmAlert": "Confirm alert",
+    "activeAlert": "We'll notify you when it's {{price}} or less",
+    "cancelAlert": "Cancel alert",
+    "toasts": {
+      "created": "Price alert created",
+      "createdError": "Couldn't create the alert",
+      "cancelled": "Alert cancelled",
+      "cancelledError": "Couldn't cancel the alert"
+    }
   }
 }

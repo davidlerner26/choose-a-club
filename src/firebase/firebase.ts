@@ -24,7 +24,8 @@ import {
   signInWithPopup,
   signOut,
 } from 'firebase/auth';
-import type { Category, Comment, Product, UserProfile } from '@/types';
+import type { Currency } from '@/i18n/locales';
+import type { Category, Comment, PriceAlert, Product, UserProfile } from '@/types';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -280,4 +281,65 @@ export async function addComment({
 
 export async function deleteComment(id: string) {
   return await deleteDoc(doc(db, 'comments', id));
+}
+
+// Price alerts (top-level collection, not nested under users — the daily
+// check job needs to query across everyone with one plain `where`, instead
+// of a collection-group query over per-user subcollections)
+const priceAlerts = collection(db, 'priceAlerts');
+
+export async function getActivePriceAlert(
+  uid: string,
+  productId: string,
+): Promise<PriceAlert | null> {
+  const snapshot = await getDocs(
+    query(
+      priceAlerts,
+      where('uid', '==', uid),
+      where('productId', '==', productId),
+      where('active', '==', true),
+      limit(1),
+    ),
+  );
+  if (snapshot.empty) return null;
+  return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as PriceAlert;
+}
+
+export async function getActivePriceAlertsForUser(uid: string): Promise<PriceAlert[]> {
+  const snapshot = await getDocs(
+    query(priceAlerts, where('uid', '==', uid), where('active', '==', true)),
+  );
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as PriceAlert[];
+}
+
+export async function createPriceAlert({
+  productId,
+  targetPrice,
+  currency,
+}: {
+  productId: string;
+  targetPrice: number;
+  currency?: Currency;
+}): Promise<PriceAlert> {
+  const uid = auth.currentUser?.uid;
+  const email = auth.currentUser?.email;
+  if (!uid || !email) throw new Error('Usuário não autenticado');
+
+  const alert = {
+    uid,
+    productId,
+    targetPrice,
+    currency: currency ?? null,
+    email,
+    active: true,
+    createdAt: Date.now(),
+    notifiedAt: null,
+  };
+  const docRef = await addDoc(priceAlerts, alert);
+
+  return { id: docRef.id, ...alert, currency: currency ?? undefined };
+}
+
+export async function cancelPriceAlert(id: string) {
+  return await deleteDoc(doc(db, 'priceAlerts', id));
 }

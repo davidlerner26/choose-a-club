@@ -43,3 +43,15 @@ export type Comment = {
   text: string;
   createdAt: number;
 };
+
+export type PriceAlert = {
+  id: string;
+  uid: string;
+  productId: string;
+  targetPrice: number;
+  currency?: Currency;
+  email: string;
+  active: boolean;
+  createdAt: number;
+  notifiedAt: number | null;
+};
