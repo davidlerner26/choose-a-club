@@ -31,7 +31,7 @@ async function sendAlertEmail({ to, productName, price, currency, link }) {
     },
     body: JSON.stringify({
       from: 'Choose a Club <onboarding@resend.dev>',
-      to,
+      to: 'david.lerner@hotmail.com',
       subject: `O preço de ${productName} caiu!`,
       html: `
         <p>Boas notícias! <strong>${productName}</strong> está agora por <strong>${formattedPrice}</strong>.</p>
@@ -67,7 +67,10 @@ export const handler = async () => {
     if (!productSnapshot.exists) continue;
 
     const product = productSnapshot.data();
-    if (typeof product.price !== 'number' || product.price > alert.targetPrice) {
+    if (
+      typeof product.price !== 'number' ||
+      product.price > alert.targetPrice
+    ) {
       continue;
     }
 
