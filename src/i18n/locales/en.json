@@ -5,6 +5,13 @@
     "login": "Log in",
     "logout": "Log out"
   },
+  "nav": {
+    "overview": "Overview",
+    "wishlist": "My wishlist",
+    "alerts": "Price alerts",
+    "explore": "Explore",
+    "settings": "Settings"
+  },
   "login": {
     "subtitle": "Save the products you love and never lose track of what you want to buy",
     "continueWithGoogle": "Continue with Google",
@@ -131,5 +138,41 @@
   "userMenu": {
     "viewProfile": "View my profile",
     "logout": "Log out"
+  },
+  "overview": {
+    "subtitle": "Track prices and buy at the right time.",
+    "stats": {
+      "products_one": "{{count}} product",
+      "products_other": "{{count}} products",
+      "dropping_one": "{{count}} dropping",
+      "dropping_other": "{{count}} dropping",
+      "bought_one": "{{count}} bought",
+      "bought_other": "{{count}} bought"
+    },
+    "recentlyAdded": "Recently added",
+    "seeAll": "See full wishlist"
+  },
+  "alerts": {
+    "subtitle": "Items from your wishlist that already dropped in price.",
+    "emptyTitle": "No alerts yet",
+    "emptySubtitle": "When an item on your wishlist drops in price, it shows up here."
+  },
+  "explore": {
+    "subtitle": "Coming soon",
+    "comingSoon": "This area is under construction. Soon you'll be able to discover other people's wishlists here."
+  },
+  "settings": {
+    "subtitle": "Your account and preferences.",
+    "account": "Account",
+    "signOut": "Sign out",
+    "publicProfile": "Public profile",
+    "viewProfile": "View profile",
+    "languages": "Languages and currencies"
+  },
+  "productDetail": {
+    "originalPrice": "Original price",
+    "goodPrice": "Good price",
+    "goodPriceDescription": "This price is {{percent}}% cheaper than the original.",
+    "trend": "Price trend"
   }
 }

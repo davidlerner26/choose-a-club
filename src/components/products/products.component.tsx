@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { User } from 'firebase/auth';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -15,13 +16,13 @@ import { deleteProduct, updateProduct } from '@/firebase/firebase';
 import type { Currency } from '@/i18n/locales';
 import type { Product } from '@/types';
 import Comments from '../comments/comments.component';
+import ProductDetailDialog from '../product-detail-dialog/product-detail-dialog.component';
 
 export default function Products({
   priceWithCurrency,
   updateProducts,
   setIsLoading,
-  setId,
-  setOpen,
+  onEdit,
   productsView,
   isOwner,
   profileUserId,
@@ -31,8 +32,7 @@ export default function Products({
   priceWithCurrency: (price: number, sourceCurrency?: Currency) => string;
   updateProducts: () => Promise<void>;
   setIsLoading: (isLoading: boolean) => void;
-  setId: (id: string) => void;
-  setOpen: (open: boolean) => void;
+  onEdit: (id: string) => void;
   productsView: Product[];
   isOwner: boolean;
   profileUserId: string;
@@ -40,6 +40,7 @@ export default function Products({
   isRefreshingProducts: boolean;
 }) {
   const { t } = useTranslation();
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
 
   const firstLetterUppercase = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -68,6 +69,7 @@ export default function Products({
     try {
       await updateProduct(id, product);
       await updateProducts();
+      setDetailProduct(null);
       toast.success(t('products.toasts.bought'));
     } catch (error) {
       console.error(error);
@@ -79,8 +81,8 @@ export default function Products({
   };
 
   const editProduct = (id: string) => {
-    setId(id);
-    setOpen(true);
+    setDetailProduct(null);
+    onEdit(id);
   };
 
   const removeProduct = async (id: string, name: string) => {
@@ -88,6 +90,7 @@ export default function Products({
     try {
       await deleteProduct(id);
       await updateProducts();
+      setDetailProduct(null);
       toast.success(t('products.toasts.removed'));
     } catch (error) {
       console.error(error);
@@ -119,14 +122,39 @@ export default function Products({
                 title={name}
                 className="animate-in slide-in-from-right fade-in duration-500 ease-out"
               >
-                <Card className="h-full transition-shadow hover:shadow-md">
+                <Card className="h-full transition-shadow hover:shadow-lg hover:shadow-primary/5">
                   <CardContent>
-                    <div
-                      className="h-64 sm:h-80 mb-3 rounded-lg bg-muted"
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDetailProduct({
+                          id,
+                          name,
+                          price,
+                          priceFrom,
+                          currency,
+                          link,
+                          store,
+                          category,
+                          url,
+                          bought,
+                          available,
+                        })
+                      }
+                      className="relative mb-3 block h-64 w-full cursor-pointer rounded-xl bg-muted outline-none focus-visible:ring-3 focus-visible:ring-ring/50 sm:h-80"
                       style={{
                         background: `url(${url}) center center / contain no-repeat`,
                       }}
-                    ></div>
+                    >
+                      {!!priceFrom && priceFrom > price && (
+                        <Badge
+                          variant="success"
+                          className="absolute top-2 left-2"
+                        >
+                          -{Math.round(((priceFrom - price) / priceFrom) * 100)}%
+                        </Badge>
+                      )}
+                    </button>
                     <p className="truncate text-xs font-medium tracking-wide text-muted-foreground uppercase">
                       {store} · {category}
                     </p>
@@ -215,6 +243,16 @@ export default function Products({
       ) : isRefreshingProducts ? null : (
         <NoProductsFound />
       )}
+      <ProductDetailDialog
+        product={detailProduct}
+        open={!!detailProduct}
+        onOpenChange={(open) => !open && setDetailProduct(null)}
+        priceWithCurrency={priceWithCurrency}
+        isOwner={isOwner}
+        onBuy={buyProduct}
+        onEdit={editProduct}
+        onRemove={removeProduct}
+      />
     </div>
   );
 }

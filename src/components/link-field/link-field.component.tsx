@@ -91,11 +91,7 @@ export default function LinkField({
         />
         <FieldError>{errors.link?.message}</FieldError>
       </Field>
-      <Button
-        size="lg"
-        className="bg-red-700 hover:bg-red-800"
-        onClick={() => search()}
-      >
+      <Button size="lg" onClick={() => search()}>
         {t('common.add')}
       </Button>
     </div>

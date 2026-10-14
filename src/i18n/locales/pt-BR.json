@@ -5,6 +5,13 @@
     "login": "Entrar",
     "logout": "Sair"
   },
+  "nav": {
+    "overview": "Visão geral",
+    "wishlist": "Minha wishlist",
+    "alerts": "Alertas de preço",
+    "explore": "Explorar",
+    "settings": "Configurações"
+  },
   "login": {
     "subtitle": "Guarde os produtos que você ama e nunca perca de vista o que deseja comprar",
     "continueWithGoogle": "Continuar com o Google",
@@ -131,5 +138,41 @@
   "userMenu": {
     "viewProfile": "Ver meu perfil",
     "logout": "Sair"
+  },
+  "overview": {
+    "subtitle": "Acompanhe preços e compre na hora certa.",
+    "stats": {
+      "products_one": "{{count}} produto",
+      "products_other": "{{count}} produtos",
+      "dropping_one": "{{count}} em queda",
+      "dropping_other": "{{count}} em queda",
+      "bought_one": "{{count}} comprado",
+      "bought_other": "{{count}} comprados"
+    },
+    "recentlyAdded": "Adicionados recentemente",
+    "seeAll": "Ver wishlist completa"
+  },
+  "alerts": {
+    "subtitle": "Produtos da sua wishlist que já baixaram de preço.",
+    "emptyTitle": "Nenhum alerta por enquanto",
+    "emptySubtitle": "Quando um produto da sua wishlist cair de preço, ele aparece aqui."
+  },
+  "explore": {
+    "subtitle": "Em breve",
+    "comingSoon": "Essa área está em construção. Em breve você vai poder descobrir as wishlists de outras pessoas por aqui."
+  },
+  "settings": {
+    "subtitle": "Sua conta e preferências.",
+    "account": "Conta",
+    "signOut": "Sair da conta",
+    "publicProfile": "Perfil público",
+    "viewProfile": "Ver perfil",
+    "languages": "Idiomas e moedas"
+  },
+  "productDetail": {
+    "originalPrice": "Preço original",
+    "goodPrice": "Bom preço",
+    "goodPriceDescription": "Esse preço está {{percent}}% mais barato que o original.",
+    "trend": "Variação de preço"
   }
 }

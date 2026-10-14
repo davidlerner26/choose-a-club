@@ -9,7 +9,24 @@ import { LocaleProvider } from '@/components/locale-provider/locale-provider.com
 import { LOCALES, PREFIXED_LOCALE_CODES } from '@/i18n/locales';
 import ChooseUsernameDialog from './components/choose-username-dialog/choose-username-dialog.component';
 import HomePage from './pages/home/home.component';
-import ProfilePage from './pages/profile/profile.component';
+import ProfileLayout from './pages/profile-layout/profile-layout.component';
+import OverviewPage from './pages/overview/overview.component';
+import WishlistPage from './pages/wishlist/wishlist.component';
+import AlertsPage from './pages/alerts/alerts.component';
+import ExplorePage from './pages/explore/explore.component';
+import SettingsPage from './pages/settings/settings.component';
+
+function profileChildRoutes() {
+  return (
+    <>
+      <Route index element={<OverviewPage />} />
+      <Route path="wishlist" element={<WishlistPage />} />
+      <Route path="alertas" element={<AlertsPage />} />
+      <Route path="explorar" element={<ExplorePage />} />
+      <Route path="configuracoes" element={<SettingsPage />} />
+    </>
+  );
+}
 
 export default function App() {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -48,10 +65,12 @@ export default function App() {
           path="/:username"
           element={
             <LocaleProvider locale="pt-BR">
-              <ProfilePage />
+              <ProfileLayout />
             </LocaleProvider>
           }
-        />
+        >
+          {profileChildRoutes()}
+        </Route>
         {PREFIXED_LOCALE_CODES.map((code) => (
           <Fragment key={code}>
             <Route
@@ -66,10 +85,12 @@ export default function App() {
               path={`/${LOCALES[code].urlPrefix}/:username`}
               element={
                 <LocaleProvider locale={code}>
-                  <ProfilePage />
+                  <ProfileLayout />
                 </LocaleProvider>
               }
-            />
+            >
+              {profileChildRoutes()}
+            </Route>
           </Fragment>
         ))}
         <Route path="*" element={<Navigate to="/" replace />} />
