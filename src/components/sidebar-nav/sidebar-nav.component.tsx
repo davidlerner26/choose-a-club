@@ -20,9 +20,11 @@ const NAV_ITEMS = [
 
 export default function SidebarNav({
   username,
+  isOwner,
   compact = false,
 }: {
   username: string;
+  isOwner: boolean;
   compact?: boolean;
 }) {
   const { t } = useTranslation();
@@ -31,27 +33,34 @@ export default function SidebarNav({
 
   return (
     <nav className={cn(compact ? 'flex items-center justify-around' : 'flex flex-col gap-1')}>
-      {NAV_ITEMS.map(({ segment, icon: Icon, label }) => (
-        <NavLink
-          key={segment}
-          to={segment ? `${base}/${segment}` : base}
-          end
-          className={({ isActive }) =>
-            cn(
-              'flex items-center rounded-lg text-sm font-medium transition-colors',
-              compact
-                ? 'flex-col gap-1 px-3 py-1.5 text-[0.65rem]'
-                : 'gap-3 px-3 py-2',
-              isActive
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
-            )
-          }
-        >
-          <Icon className="size-5" stroke={2} />
-          <span>{t(label)}</span>
-        </NavLink>
-      ))}
+      {NAV_ITEMS.map(({ segment, icon: Icon, label }) => {
+        // visitando o perfil de outra pessoa, nenhum link do menu (que
+        // sempre aponta pra própria conta) bate com a URL atual — força o
+        // Explorar como selecionado, já que foi por ali que se chegou aqui
+        const forceActive = !isOwner && segment === 'explorar';
+
+        return (
+          <NavLink
+            key={segment}
+            to={segment ? `${base}/${segment}` : base}
+            end
+            className={({ isActive }) =>
+              cn(
+                'flex items-center rounded-lg text-sm font-medium transition-colors',
+                compact
+                  ? 'flex-col gap-1 px-3 py-1.5 text-[0.65rem]'
+                  : 'gap-3 px-3 py-2',
+                isActive || forceActive
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
+              )
+            }
+          >
+            <Icon className="size-5" stroke={2} />
+            <span>{t(label)}</span>
+          </NavLink>
+        );
+      })}
     </nav>
   );
 }

@@ -71,7 +71,7 @@ export default function ProductDetailDialog({
               <Badge variant="success">-{percent}%</Badge>
             </>
           )}
-          {available === false && (
+          {available === false && !bought && (
             <Badge variant="destructive">{t('products.unavailable')}</Badge>
           )}
         </div>

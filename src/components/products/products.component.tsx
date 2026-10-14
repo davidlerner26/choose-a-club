@@ -17,6 +17,7 @@ import type { Currency } from '@/i18n/locales';
 import type { Product } from '@/types';
 import Comments from '../comments/comments.component';
 import ProductDetailDialog from '../product-detail-dialog/product-detail-dialog.component';
+import PriceTrendChart from '../price-trend-chart/price-trend-chart.component';
 
 export default function Products({
   priceWithCurrency,
@@ -172,12 +173,19 @@ export default function Products({
                           {priceWithCurrency(priceFrom, currency)}
                         </p>
                       )}
-                      {available === false && (
+                      {available === false && !bought && (
                         <Badge variant="destructive">
                           {t('products.unavailable')}
                         </Badge>
                       )}
                     </div>
+                    {price > 0 && (
+                      <PriceTrendChart
+                        from={priceFrom && priceFrom > price ? priceFrom : price}
+                        to={price}
+                        className="mt-2 h-10"
+                      />
+                    )}
                   </CardContent>
                   <CardFooter className="rounded-b-none">
                     <div className="flex items-center justify-between w-full">

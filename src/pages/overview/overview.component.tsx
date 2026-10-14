@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { IconCheck, IconShoppingBag, IconTrendingDown } from '@tabler/icons-react';
 import type { Icon } from '@tabler/icons-react';
@@ -80,6 +80,12 @@ export default function OverviewPage() {
         <Spinner className="text-primary" />
       </div>
     );
+  }
+
+  // visitantes caem direto na wishlist da pessoa — a visão geral (com
+  // estatísticas e atalhos) só faz sentido pro dono do perfil
+  if (!isOwner) {
+    return <Navigate to="wishlist" replace />;
   }
 
   return (

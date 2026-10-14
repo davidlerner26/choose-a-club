@@ -139,6 +139,9 @@
     "viewProfile": "My wishlist",
     "logout": "Log out"
   },
+  "wishlist": {
+    "visitorTitle": "{{name}}'s wishlist"
+  },
   "overview": {
     "subtitle": "Track prices and buy at the right time.",
     "stats": {

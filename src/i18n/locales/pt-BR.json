@@ -74,7 +74,7 @@
   },
   "options": {
     "wanted": "Desejando",
-    "bought": "Já comprei"
+    "bought": "Já comprou"
   },
   "search": {
     "placeholder": "Buscar peça..."
@@ -138,6 +138,9 @@
   "userMenu": {
     "viewProfile": "My wishlist",
     "logout": "Sair"
+  },
+  "wishlist": {
+    "visitorTitle": "Wishlist da {{name}}"
   },
   "overview": {
     "subtitle": "Acompanhe preços e compre na hora certa.",

@@ -33,7 +33,7 @@ export default function AppShell({
             <span className="block h-0.5 w-10 rounded-full bg-gradient-to-r from-primary to-accent-purple" />
           </div>
         </div>
-        <SidebarNav username={username} />
+        <SidebarNav username={username} isOwner={isOwner} />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col pb-16 lg:pb-0">
@@ -49,7 +49,7 @@ export default function AppShell({
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-sidebar-border bg-sidebar px-2 py-1 lg:hidden">
-        <SidebarNav username={username} compact />
+        <SidebarNav username={username} isOwner={isOwner} compact />
       </nav>
     </div>
   );
