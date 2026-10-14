@@ -136,7 +136,7 @@
     "submit": "Comment"
   },
   "userMenu": {
-    "viewProfile": "View my profile",
+    "viewProfile": "My wishlist",
     "logout": "Log out"
   },
   "overview": {
@@ -158,15 +158,17 @@
     "emptySubtitle": "When an item on your wishlist drops in price, it shows up here."
   },
   "explore": {
-    "subtitle": "Coming soon",
-    "comingSoon": "This area is under construction. Soon you'll be able to discover other people's wishlists here."
+    "subtitle": "Discover other people's wishlists.",
+    "searchPlaceholder": "Search by name or @username...",
+    "empty": "No profiles found.",
+    "you": "you"
   },
   "settings": {
     "subtitle": "Your account and preferences.",
     "account": "Account",
     "signOut": "Sign out",
     "publicProfile": "Public profile",
-    "viewProfile": "View profile",
+    "viewProfile": "My wishlist",
     "languages": "Languages and currencies"
   },
   "productDetail": {

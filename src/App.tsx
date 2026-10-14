@@ -65,7 +65,7 @@ export default function App() {
           path="/:username"
           element={
             <LocaleProvider locale="pt-BR">
-              <ProfileLayout />
+              <ProfileLayout ownProfile={profile} />
             </LocaleProvider>
           }
         >
@@ -85,7 +85,7 @@ export default function App() {
               path={`/${LOCALES[code].urlPrefix}/:username`}
               element={
                 <LocaleProvider locale={code}>
-                  <ProfileLayout />
+                  <ProfileLayout ownProfile={profile} />
                 </LocaleProvider>
               }
             >

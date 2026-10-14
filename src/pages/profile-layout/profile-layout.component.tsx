@@ -16,7 +16,7 @@ import { useProductReveal } from '@/hooks/use-product-reveal';
 import type { ProfileOutletContextValue } from '@/hooks/use-profile-outlet';
 import type { Category, Product, UserProfile } from '@/types';
 
-export default function ProfileLayout() {
+export default function ProfileLayout({ ownProfile }: { ownProfile: UserProfile | null }) {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -158,7 +158,7 @@ export default function ProfileLayout() {
 
   return (
     <AppShell
-      username={profile.username}
+      username={ownProfile?.username ?? profile.username}
       isOwner={isOwner}
       user={user}
       onProductFetched={(fetched) => {

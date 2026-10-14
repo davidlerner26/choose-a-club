@@ -8,7 +8,9 @@ import {
   collection,
   deleteDoc,
   doc,
+  getCountFromServer,
   limit,
+  orderBy,
   query,
   setDoc,
   updateDoc,
@@ -98,6 +100,33 @@ export async function deleteProduct(id: string) {
   if (!userId) throw new Error('Usuário não autenticado');
 
   return await deleteDoc(doc(db, 'users', userId, 'products', id));
+}
+
+// Pra cards de preview (ex: página de Explorar) — quantos produtos estão
+// desejados vs. já comprados (via contagem agregada, sem baixar a coleção
+// inteira) + um buffer de produtos recentes maior que o necessário, já que
+// o preview descarta os com foto quebrada/em branco e precisa de sobra pra
+// ainda conseguir preencher os espaços (ver src/lib/is-usable-image.ts).
+const PREVIEW_BUFFER_SIZE = 18;
+
+export async function getProductsPreview(
+  userId: string,
+): Promise<{ products: Product[]; wantedCount: number; boughtCount: number }> {
+  const collectionRef = productsCollection(userId);
+  const [wantedCountSnapshot, boughtCountSnapshot, previewSnapshot] = await Promise.all([
+    getCountFromServer(query(collectionRef, where('bought', '==', false))),
+    getCountFromServer(query(collectionRef, where('bought', '==', true))),
+    getDocs(query(collectionRef, orderBy('createdAt', 'desc'), limit(PREVIEW_BUFFER_SIZE))),
+  ]);
+
+  return {
+    products: previewSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Product[],
+    wantedCount: wantedCountSnapshot.data().count,
+    boughtCount: boughtCountSnapshot.data().count,
+  };
 }
 
 export async function getProduct(id: string): Promise<Product | null> {
@@ -191,6 +220,15 @@ export async function getUserByUsername(
   );
   if (snapshot.empty) return null;
   return snapshot.docs[0].data() as UserProfile;
+}
+
+// Lista de perfis pra página de Explorar — mais recentes primeiro, com um
+// teto razoável pra não carregar a coleção inteira de uma vez.
+export async function getAllUserProfiles(): Promise<UserProfile[]> {
+  const snapshot = await getDocs(
+    query(users, orderBy('createdAt', 'desc'), limit(60)),
+  );
+  return snapshot.docs.map((doc) => doc.data()) as UserProfile[];
 }
 
 // Comments

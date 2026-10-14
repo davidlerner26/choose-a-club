@@ -13,20 +13,10 @@ import {
   deleteComment,
   getProductComments,
 } from '@/firebase/firebase';
-import { cn } from '@/lib/utils';
+import { cn, initials } from '@/lib/utils';
 import { useLocale } from '@/hooks/use-locale';
 import i18n from '@/i18n/i18n';
 import type { Comment } from '@/types';
-
-function initials(name?: string | null) {
-  if (!name) return '?';
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('');
-}
 
 function relativeTime(timestamp: number) {
   const diffMs = Date.now() - timestamp;

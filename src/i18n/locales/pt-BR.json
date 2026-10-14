@@ -136,7 +136,7 @@
     "submit": "Comentar"
   },
   "userMenu": {
-    "viewProfile": "Ver meu perfil",
+    "viewProfile": "My wishlist",
     "logout": "Sair"
   },
   "overview": {
@@ -158,15 +158,17 @@
     "emptySubtitle": "Quando um produto da sua wishlist cair de preço, ele aparece aqui."
   },
   "explore": {
-    "subtitle": "Em breve",
-    "comingSoon": "Essa área está em construção. Em breve você vai poder descobrir as wishlists de outras pessoas por aqui."
+    "subtitle": "Descubra as wishlists de outras pessoas.",
+    "searchPlaceholder": "Buscar por nome ou @usuário...",
+    "empty": "Nenhum perfil encontrado.",
+    "you": "você"
   },
   "settings": {
     "subtitle": "Sua conta e preferências.",
     "account": "Conta",
     "signOut": "Sair da conta",
     "publicProfile": "Perfil público",
-    "viewProfile": "Ver perfil",
+    "viewProfile": "My wishlist",
     "languages": "Idiomas e moedas"
   },
   "productDetail": {

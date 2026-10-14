@@ -7,16 +7,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useOwnProfile } from '@/hooks/use-own-profile';
 import { useLocale } from '@/hooks/use-locale';
 import { signOutUser } from '@/firebase/firebase';
-
-function initials(name?: string | null) {
-  if (!name) return '?';
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('');
-}
+import { initials } from '@/lib/utils';
 
 export default function UserMenu() {
   const { t } = useTranslation();
