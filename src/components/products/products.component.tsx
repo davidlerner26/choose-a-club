@@ -5,13 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import NoProductsFound from '../no-products-found/no-products-found.component';
-import { Button, buttonVariants } from '@/components/ui/button';
-import {
-  IconCheck,
-  IconEdit,
-  IconExternalLink,
-  IconX,
-} from '@tabler/icons-react';
+import { Button } from '@/components/ui/button';
+import { IconCheck, IconChevronRight, IconEdit, IconX } from '@tabler/icons-react';
 import { deleteProduct, updateProduct } from '@/firebase/firebase';
 import type { Currency } from '@/i18n/locales';
 import type { Product } from '@/types';
@@ -187,55 +182,55 @@ export default function Products({
                       />
                     )}
                   </CardContent>
-                  <CardFooter className="rounded-b-none">
-                    <div className="flex items-center justify-between w-full">
-                      <div>
-                        <a
-                          href={link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={buttonVariants({ variant: 'link' })}
+                  <CardFooter className="flex-col items-stretch gap-2 rounded-b-none">
+                    <a
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={t('products.viewInStore')}
+                      className="flex items-center justify-between rounded-md px-1 py-1 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                    >
+                      <span className="truncate">{store}</span>
+                      <IconChevronRight
+                        className="size-4 shrink-0 text-muted-foreground"
+                        stroke={2}
+                      />
+                    </a>
+                    {isOwner && !bought && (
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            buyProduct({
+                              id,
+                              name,
+                              price,
+                              link,
+                              store,
+                              category,
+                              url,
+                            })
+                          }
                         >
-                          {t('products.viewInStore')}
-                          <IconExternalLink stroke={2} />
-                        </a>
+                          <IconCheck stroke={2} />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => editProduct(id)}
+                        >
+                          <IconEdit stroke={2} />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeProduct(id, name)}
+                        >
+                          <IconX stroke={2} />
+                        </Button>
                       </div>
-                      {isOwner && !bought && (
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              buyProduct({
-                                id,
-                                name,
-                                price,
-                                link,
-                                store,
-                                category,
-                                url,
-                              })
-                            }
-                          >
-                            <IconCheck stroke={2} />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => editProduct(id)}
-                          >
-                            <IconEdit stroke={2} />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => removeProduct(id, name)}
-                          >
-                            <IconX stroke={2} />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </CardFooter>
                   <Comments
                     productId={id}

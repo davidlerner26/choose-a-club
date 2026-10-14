@@ -15,17 +15,16 @@ export default function Options({
   ];
 
   return (
-    <div className="flex gap-1 rounded-full bg-muted p-1">
+    <div className="flex h-9 gap-1 rounded-full bg-muted p-1">
       {options.map((option) => (
         <Button
           variant="ghost"
-          size="sm"
           onClick={() => selectOption(option.bought)}
           key={option.value}
           className={
             option.bought === optionSelected
-              ? 'rounded-full bg-card text-primary shadow-sm hover:bg-card'
-              : 'rounded-full text-muted-foreground hover:bg-transparent'
+              ? 'h-full rounded-full bg-card px-4 text-sm text-primary shadow-sm hover:bg-card'
+              : 'h-full rounded-full px-4 text-sm text-muted-foreground hover:bg-transparent'
           }
         >
           {option.value}

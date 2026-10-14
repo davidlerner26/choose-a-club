@@ -8,6 +8,20 @@ import { getAllUserProfiles } from '@/firebase/firebase';
 import { useAuth } from '@/hooks/use-auth';
 import type { UserProfile } from '@/types';
 
+// contas fixadas no topo da lista de Explorar, nessa ordem, antes de todo o
+// resto (que segue a ordem de criação mais recente vinda do backend)
+const PINNED_USERNAMES = ['thetziniutclub', 'thedavidlernerclub'];
+
+function withPinnedFirst(profiles: UserProfile[]): UserProfile[] {
+  const pinned = PINNED_USERNAMES.map((username) =>
+    profiles.find((profile) => profile.username === username),
+  ).filter((profile): profile is UserProfile => !!profile);
+  const rest = profiles.filter(
+    (profile) => !PINNED_USERNAMES.includes(profile.username),
+  );
+  return [...pinned, ...rest];
+}
+
 export default function ExplorePage() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -20,7 +34,7 @@ export default function ExplorePage() {
     let cancelled = false;
     getAllUserProfiles().then((result) => {
       if (cancelled) return;
-      setProfiles(result);
+      setProfiles(withPinnedFirst(result));
       setIsLoading(false);
     });
     return () => {

@@ -6,10 +6,12 @@ export default function Categories({
   selectedCategory,
   selectCategory,
   categories,
+  counts,
 }: {
   selectedCategory: string;
   selectCategory: (category: string) => void;
   categories: string[];
+  counts?: Record<string, number>;
 }) {
   const { t } = useTranslation();
 
@@ -24,6 +26,7 @@ export default function Categories({
           data-selected={selectedCategory === category}
         >
           {category === ALL_CATEGORIES ? t('categories.all') : category}
+          {counts && <span className="opacity-70">({counts[category] ?? 0})</span>}
         </Badge>
       ))}
     </div>

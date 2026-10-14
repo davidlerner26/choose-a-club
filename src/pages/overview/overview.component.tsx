@@ -9,6 +9,7 @@ import Products from '@/components/products/products.component';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileOutlet } from '@/hooks/use-profile-outlet';
+import { useWishlistStats } from '@/hooks/use-wishlist-stats';
 
 const OVERVIEW_LIMIT = 8;
 
@@ -50,12 +51,7 @@ export default function OverviewPage() {
     requestReveal,
   } = useProfileOutlet();
 
-  const wanted = useMemo(() => products.filter((item) => !item.bought), [products]);
-  const dropping = useMemo(
-    () => wanted.filter((item) => item.priceFrom && item.priceFrom > item.price),
-    [wanted],
-  );
-  const bought = useMemo(() => products.filter((item) => item.bought), [products]);
+  const { wanted, dropping, bought } = useWishlistStats(products);
 
   const recent = useMemo(
     () =>

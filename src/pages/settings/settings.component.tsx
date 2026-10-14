@@ -1,29 +1,17 @@
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { IconLogout2 } from '@tabler/icons-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
-import { useLocale } from '@/hooks/use-locale';
 import { useProfileOutlet } from '@/hooks/use-profile-outlet';
 import { signOutUser } from '@/firebase/firebase';
 import { LOCALES } from '@/i18n/locales';
-
-function initials(name?: string | null) {
-  if (!name) return '?';
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('');
-}
+import { initials } from '@/lib/utils';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfileOutlet();
-  const { path } = useLocale();
 
   return (
     <div className="max-w-xl">
@@ -57,18 +45,6 @@ export default function SettingsPage() {
           <IconLogout2 stroke={2} />
           {t('settings.signOut')}
         </Button>
-      </section>
-
-      <section className="mb-6 rounded-xl border bg-card p-5">
-        <h2 className="mb-4 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-          {t('settings.publicProfile')}
-        </h2>
-        <Link
-          to={path(`/${profile.username}`)}
-          className={buttonVariants({ variant: 'outline' })}
-        >
-          {t('settings.viewProfile')}
-        </Link>
       </section>
 
       <section className="rounded-xl border bg-card p-5">

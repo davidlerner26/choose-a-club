@@ -59,7 +59,9 @@ export default function TopBar({
           </Button>
         )}
         {user ? (
-          <UserMenu />
+          <div className="lg:hidden">
+            <UserMenu />
+          </div>
         ) : (
           <Link to={path('/')} className={buttonVariants()}>
             {t('common.login')}

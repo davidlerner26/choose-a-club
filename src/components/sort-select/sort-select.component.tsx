@@ -28,7 +28,7 @@ export default function SortSelect({
       value={sortBy}
       onValueChange={(value) => setSortBy(value as SortOption)}
     >
-      <SelectTrigger className="w-full sm:w-44">
+      <SelectTrigger className="h-9 w-full rounded-full border-none bg-muted px-4 text-sm font-medium sm:w-auto">
         <SelectValue placeholder={t('sort.placeholder')}>
           {(value: SortOption) =>
             sortOptions.find((option) => option.value === value)?.label

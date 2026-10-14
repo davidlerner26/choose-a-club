@@ -162,7 +162,7 @@
   },
   "explore": {
     "subtitle": "Discover other people's wishlists.",
-    "searchPlaceholder": "Search by name or @username...",
+    "searchPlaceholder": "Search by name",
     "empty": "No profiles found.",
     "you": "you"
   },
@@ -170,8 +170,6 @@
     "subtitle": "Your account and preferences.",
     "account": "Account",
     "signOut": "Sign out",
-    "publicProfile": "Public profile",
-    "viewProfile": "My wishlist",
     "languages": "Languages and currencies"
   },
   "productDetail": {

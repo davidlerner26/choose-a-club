@@ -11,6 +11,7 @@ import SortSelect from '@/components/sort-select/sort-select.component';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileOutlet } from '@/hooks/use-profile-outlet';
+import { useWishlistStats } from '@/hooks/use-wishlist-stats';
 import { ALL_CATEGORIES } from '@/lib/constants';
 import type { SortOption } from '@/types';
 
@@ -42,6 +43,16 @@ export default function WishlistPage() {
   const [lastFilterKey, setLastFilterKey] = useState<string>('');
 
   const categoryNames = useMemo(() => categories.map((c) => c.name), [categories]);
+  const { wanted, dropping, bought } = useWishlistStats(products);
+
+  const categoryCounts = useMemo(() => {
+    const base = products.filter((item) => item.bought === optionSelected);
+    const counts: Record<string, number> = { [ALL_CATEGORIES]: base.length };
+    categoryNames.forEach((name) => {
+      counts[name] = base.filter((item) => item.category === name).length;
+    });
+    return counts;
+  }, [products, optionSelected, categoryNames]);
 
   const productsView = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -107,31 +118,61 @@ export default function WishlistPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
-          {isOwner
-            ? t('nav.wishlist')
-            : t('wishlist.visitorTitle', { name: profile.displayName })}
-        </h1>
-        {isOwner && <p className="text-muted-foreground">{t('overview.subtitle')}</p>}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
+            {isOwner
+              ? t('nav.wishlist')
+              : t('wishlist.visitorTitle', { name: profile.displayName })}
+          </h1>
+          {isOwner && <p className="text-muted-foreground">{t('overview.subtitle')}</p>}
+        </div>
+
+        <div className="flex items-center gap-4 sm:gap-6">
+          <div className="text-right">
+            <p className="text-lg leading-tight font-semibold text-foreground">
+              {wanted.length}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t('overview.stats.products', { count: wanted.length })}
+            </p>
+          </div>
+          <div className="h-8 w-px bg-border" />
+          <div className="text-right">
+            <p className="text-lg leading-tight font-semibold text-foreground">
+              {dropping.length}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t('overview.stats.dropping', { count: dropping.length })}
+            </p>
+          </div>
+          <div className="h-8 w-px bg-border" />
+          <div className="text-right">
+            <p className="text-lg leading-tight font-semibold text-foreground">
+              {bought.length}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t('overview.stats.bought', { count: bought.length })}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center gap-2">
         <Categories
           selectedCategory={selectedCategory}
           selectCategory={setSelectedCategory}
           categories={
             categoryNames.length ? [ALL_CATEGORIES, ...categoryNames] : categoryNames
           }
+          counts={categoryCounts}
         />
         <Options selectOption={setOptionSelected} optionSelected={optionSelected} />
+        <SortSelect sortBy={sortBy} setSortBy={setSortBy} />
       </div>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <SearchField searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-          <SortSelect sortBy={sortBy} setSortBy={setSortBy} />
-        </div>
+        <SearchField searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <Button
           variant="outline"
           disabled={isRefreshingPage}

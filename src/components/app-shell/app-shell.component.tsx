@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { User } from 'firebase/auth';
 import SidebarNav from '@/components/sidebar-nav/sidebar-nav.component';
 import TopBar from '@/components/top-bar/top-bar.component';
+import UserMenu from '@/components/user-menu/user-menu.component';
 import type { Product } from '@/types';
 
 export default function AppShell({
@@ -34,6 +35,11 @@ export default function AppShell({
           </div>
         </div>
         <SidebarNav username={username} isOwner={isOwner} />
+        {user && (
+          <div className="mt-auto border-t border-sidebar-border pt-3">
+            <UserMenu variant="full" />
+          </div>
+        )}
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col pb-16 lg:pb-0">

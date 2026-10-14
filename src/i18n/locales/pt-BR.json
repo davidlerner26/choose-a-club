@@ -145,12 +145,12 @@
   "overview": {
     "subtitle": "Acompanhe preços e compre na hora certa.",
     "stats": {
-      "products_one": "{{count}} produto",
-      "products_other": "{{count}} produtos",
-      "dropping_one": "{{count}} em queda",
-      "dropping_other": "{{count}} em queda",
-      "bought_one": "{{count}} comprado",
-      "bought_other": "{{count}} comprados"
+      "products_one": "produto",
+      "products_other": "produtos",
+      "dropping_one": "em queda",
+      "dropping_other": "em queda",
+      "bought_one": "comprado",
+      "bought_other": "comprados"
     },
     "recentlyAdded": "Adicionados recentemente",
     "seeAll": "Ver wishlist completa"
@@ -162,7 +162,7 @@
   },
   "explore": {
     "subtitle": "Descubra as wishlists de outras pessoas.",
-    "searchPlaceholder": "Buscar por nome ou @usuário...",
+    "searchPlaceholder": "Buscar por nome",
     "empty": "Nenhum perfil encontrado.",
     "you": "você"
   },
@@ -170,8 +170,6 @@
     "subtitle": "Sua conta e preferências.",
     "account": "Conta",
     "signOut": "Sair da conta",
-    "publicProfile": "Perfil público",
-    "viewProfile": "My wishlist",
     "languages": "Idiomas e moedas"
   },
   "productDetail": {
