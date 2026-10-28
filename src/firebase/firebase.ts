@@ -10,6 +10,7 @@ import {
   doc,
   getCountFromServer,
   limit,
+  onSnapshot,
   orderBy,
   query,
   setDoc,
@@ -25,7 +26,16 @@ import {
   signOut,
 } from 'firebase/auth';
 import type { Currency } from '@/i18n/locales';
-import type { Category, Comment, PriceAlert, Product, UserProfile } from '@/types';
+import type {
+  AppNotification,
+  Category,
+  Comment,
+  PriceAlert,
+  PriceAlertMode,
+  PricePoint,
+  Product,
+  UserProfile,
+} from '@/types';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -316,10 +326,14 @@ export async function createPriceAlert({
   productId,
   targetPrice,
   currency,
+  mode = 'target',
+  repeat = false,
 }: {
   productId: string;
   targetPrice: number;
   currency?: Currency;
+  mode?: PriceAlertMode;
+  repeat?: boolean;
 }): Promise<PriceAlert> {
   const uid = auth.currentUser?.uid;
   const email = auth.currentUser?.email;
@@ -329,6 +343,9 @@ export async function createPriceAlert({
     uid,
     productId,
     targetPrice,
+    mode,
+    repeat,
+    lastNotifiedPrice: null,
     currency: currency ?? null,
     email,
     active: true,
@@ -342,4 +359,70 @@ export async function createPriceAlert({
 
 export async function cancelPriceAlert(id: string) {
   return await deleteDoc(doc(db, 'priceAlerts', id));
+}
+
+// Histórico de preços (subcoleção do produto). A checagem automática do
+// servidor também grava aqui; este lado cobre as atualizações feitas quando
+// o dono visita o site.
+const priceHistoryCollection = (userId: string, productId: string) =>
+  collection(db, 'users', userId, 'products', productId, 'priceHistory');
+
+export async function getPriceHistory(
+  userId: string,
+  productId: string,
+): Promise<PricePoint[]> {
+  const snapshot = await getDocs(
+    query(priceHistoryCollection(userId, productId), orderBy('at', 'asc')),
+  );
+  return snapshot.docs.map((item) => item.data() as PricePoint);
+}
+
+export async function recordPricePoint(
+  productId: string,
+  previousPrice: number,
+  price: number,
+  currency?: Currency,
+) {
+  const userId = auth.currentUser?.uid;
+  if (!userId || !(price > 0)) return;
+
+  const history = priceHistoryCollection(userId, productId);
+  const last = await getDocs(query(history, orderBy('at', 'desc'), limit(1)));
+  if (last.empty) {
+    // primeiro ponto: guarda também o preço antigo pro gráfico já ter dois
+    if (previousPrice > 0) {
+      await addDoc(history, {
+        price: previousPrice,
+        currency: currency ?? 'BRL',
+        at: Date.now() - 1,
+      });
+    }
+  } else if (last.docs[0].data().price === price) {
+    return;
+  }
+  await addDoc(history, { price, currency: currency ?? 'BRL', at: Date.now() });
+}
+
+// Notificações dentro do site (geradas pela checagem de alertas)
+const notificationsCollection = (userId: string) =>
+  collection(db, 'users', userId, 'notifications');
+
+export function subscribeNotifications(
+  userId: string,
+  onChange: (items: AppNotification[]) => void,
+) {
+  return onSnapshot(
+    query(notificationsCollection(userId), orderBy('createdAt', 'desc'), limit(30)),
+    (snapshot) =>
+      onChange(
+        snapshot.docs.map((item) => ({ id: item.id, ...item.data() })) as AppNotification[],
+      ),
+    (error) => console.error(error),
+  );
+}
+
+export async function markNotificationsRead(userId: string, ids: string[]) {
+  await Promise.all(
+    ids.map((id) => updateDoc(doc(db, 'users', userId, 'notifications', id), { read: true })),
+  );
 }

@@ -161,7 +161,12 @@
     "emptySubtitle": "Abra um produto e clique em \"Criar alerta de preço\" pra ser avisado quando o preço cair.",
     "targetLabel": "Alvo: {{price}}",
     "currentLabel": "Atual: {{price}}",
-    "cancel": "Cancelar alerta"
+    "cancel": "Cancelar alerta",
+    "modeLowest": "Avisa no menor preço já visto",
+    "modeRestock": "Avisa quando voltar ao estoque",
+    "repeat": "recorrente",
+    "away": "Faltam {{percent}}% pra chegar no alvo",
+    "reached": "Já está no alvo!"
   },
   "explore": {
     "subtitle": "Descubra as wishlists de outras pessoas.",
@@ -190,6 +195,24 @@
       "createdError": "Não consegui criar o alerta",
       "cancelled": "Alerta cancelado",
       "cancelledError": "Não consegui cancelar o alerta"
+    },
+    "activeAlertLowest": "Avisaremos quando bater o menor preço já visto",
+    "activeAlertRestock": "Avisaremos quando voltar ao estoque",
+    "lowest": "Menor: {{price}}",
+    "highest": "Maior: {{price}}",
+    "options": {
+      "percent": "-{{percent}}%",
+      "lowest": "Menor preço",
+      "custom": "Outro valor",
+      "restock": "Voltar ao estoque",
+      "preview": "Avisaremos a partir de {{price}}",
+      "repeat": "Continuar avisando se cair ainda mais"
     }
+  },
+  "notifications": {
+    "title": "Notificações",
+    "empty": "Nenhuma notificação ainda.",
+    "restock": "Voltou ao estoque!",
+    "priceDrop": "Caiu para {{price}}"
   }
 }

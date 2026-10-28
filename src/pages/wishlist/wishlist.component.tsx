@@ -101,8 +101,6 @@ export default function WishlistPage() {
 
   const isRefreshingPage = pagedProductsView.some((item) => !revealedIds.has(item.id));
 
-  const visibleProductsView = pagedProductsView.filter((item) => revealedIds.has(item.id));
-
   useEffect(() => {
     requestReveal(pagedProductsView);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-request when the current page's id set changes, not on every products/revealedIds write
@@ -192,7 +190,7 @@ export default function WishlistPage() {
           updateProducts={refetchProducts}
           setIsLoading={setIsLoading}
           onEdit={editProduct}
-          productsView={visibleProductsView}
+          productsView={pagedProductsView}
           isOwner={isOwner}
           profileUserId={profile.uid}
           currentUser={user}

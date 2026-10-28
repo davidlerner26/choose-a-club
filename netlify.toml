@@ -2,4 +2,4 @@
   functions = "netlify/functions"
 
 [functions."check-price-alerts"]
-  schedule = "@daily"
+  schedule = "0 */6 * * *"

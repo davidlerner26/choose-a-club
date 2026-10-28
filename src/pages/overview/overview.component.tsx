@@ -67,7 +67,6 @@ export default function OverviewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-request when the recent id set changes, not on every products/revealedIds write
   }, [recentIds]);
 
-  const visibleRecent = recent.filter((item) => revealedIds.has(item.id));
   const isRefreshing = recent.some((item) => !revealedIds.has(item.id));
 
   if (isLoading) {
@@ -127,7 +126,7 @@ export default function OverviewPage() {
         updateProducts={refetchProducts}
         setIsLoading={setIsLoading}
         onEdit={editProduct}
-        productsView={visibleRecent}
+        productsView={recent}
         isOwner={isOwner}
         profileUserId={profile.uid}
         currentUser={user}

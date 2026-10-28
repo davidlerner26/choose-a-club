@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { extractProduct } from '@/components/api/api';
-import { updateProduct } from '@/firebase/firebase';
+import { recordPricePoint, updateProduct } from '@/firebase/firebase';
 import type { Product } from '@/types';
 
 // A loja pode bloquear a leitura ou simplesmente não ser suportada pelo
@@ -57,6 +57,14 @@ export async function persistRefreshedProduct(
 
   try {
     await updateProduct(refreshed.id, updates);
+    if (refreshed.price !== original.price) {
+      await recordPricePoint(
+        refreshed.id,
+        original.price,
+        refreshed.price,
+        refreshed.currency,
+      );
+    }
   } catch (error) {
     console.error(error);
     toast.error('Não consegui salvar a atualização de um produto', {

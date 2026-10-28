@@ -161,7 +161,12 @@
     "emptySubtitle": "Open a product and click \"Create price alert\" to be notified when the price drops.",
     "targetLabel": "Target: {{price}}",
     "currentLabel": "Current: {{price}}",
-    "cancel": "Cancel alert"
+    "cancel": "Cancel alert",
+    "modeLowest": "Notifies at the lowest price seen",
+    "modeRestock": "Notifies when back in stock",
+    "repeat": "recurring",
+    "away": "{{percent}}% to go to reach the target",
+    "reached": "Already at target!"
   },
   "explore": {
     "subtitle": "Discover other people's wishlists.",
@@ -190,6 +195,24 @@
       "createdError": "Couldn't create the alert",
       "cancelled": "Alert cancelled",
       "cancelledError": "Couldn't cancel the alert"
+    },
+    "activeAlertLowest": "We'll notify you at the lowest price seen",
+    "activeAlertRestock": "We'll notify you when it's back in stock",
+    "lowest": "Lowest: {{price}}",
+    "highest": "Highest: {{price}}",
+    "options": {
+      "percent": "-{{percent}}%",
+      "lowest": "Lowest price",
+      "custom": "Custom price",
+      "restock": "Back in stock",
+      "preview": "We'll notify you at {{price}} or less",
+      "repeat": "Keep notifying if it drops even more"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet.",
+    "restock": "Back in stock!",
+    "priceDrop": "Dropped to {{price}}"
   }
 }

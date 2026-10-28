@@ -44,10 +44,37 @@ export type Comment = {
   createdAt: number;
 };
 
+// target: avisa quando o preço chegar em targetPrice; lowest: avisa quando
+// bater o menor preço já visto; restock: avisa quando voltar ao estoque
+export type PriceAlertMode = 'target' | 'lowest' | 'restock';
+
+export type PricePoint = {
+  price: number;
+  currency?: Currency;
+  at: number;
+};
+
+export type AppNotification = {
+  id: string;
+  type: 'price-drop' | 'restock';
+  productId: string;
+  productName: string;
+  productUrl: string;
+  price: number;
+  previousPrice: number | null;
+  currency?: Currency;
+  read: boolean;
+  createdAt: number;
+};
+
 export type PriceAlert = {
   id: string;
   uid: string;
   productId: string;
+  mode?: PriceAlertMode;
+  // mantém o alerta ativo depois de disparar (avisa de novo se cair mais)
+  repeat?: boolean;
+  lastNotifiedPrice?: number | null;
   targetPrice: number;
   currency?: Currency;
   email: string;

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ProductImage from '@/components/product-image/product-image.component';
 import type { User } from 'firebase/auth';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -139,10 +140,12 @@ export default function Products({
                         })
                       }
                       className="relative mb-3 block h-64 w-full cursor-pointer rounded-xl bg-muted outline-none focus-visible:ring-3 focus-visible:ring-ring/50 sm:h-80"
-                      style={{
-                        background: `url(${url}) center center / contain no-repeat`,
-                      }}
                     >
+                      <ProductImage
+                        url={url}
+                        alt={name}
+                        className="absolute inset-0 rounded-xl"
+                      />
                       {!!priceFrom && priceFrom > price && (
                         <Badge
                           variant="success"
@@ -189,6 +192,7 @@ export default function Products({
                           productId={id}
                           currentPrice={price}
                           currency={currency}
+                          available={available}
                           priceWithCurrency={priceWithCurrency}
                         />
                       </div>

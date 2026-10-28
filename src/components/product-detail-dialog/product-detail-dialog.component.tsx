@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import ProductImage from '@/components/product-image/product-image.component';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { IconCheck, IconEdit, IconExternalLink, IconX } from '@tabler/icons-react';
 import PriceTrendChart from '@/components/price-trend-chart/price-trend-chart.component';
 import PriceAlertSection from '@/components/price-alert-section/price-alert-section.component';
+import { usePriceHistory } from '@/hooks/use-price-history';
 import type { Currency } from '@/i18n/locales';
 import type { Product } from '@/types';
 
@@ -37,6 +39,7 @@ export default function ProductDetailDialog({
   onRemove: (id: string, name: string) => void;
 }) {
   const { t } = useTranslation();
+  const history = usePriceHistory(profileUserId, product?.id);
 
   if (!product) return null;
 
@@ -52,10 +55,7 @@ export default function ProductDetailDialog({
           <DialogTitle className="sr-only">{name}</DialogTitle>
           <DialogDescription className="sr-only">{store}</DialogDescription>
         </DialogHeader>
-        <div
-          className="h-56 w-full rounded-xl bg-muted"
-          style={{ background: `url(${url}) center center / contain no-repeat` }}
-        />
+        <ProductImage url={url} alt={name} className="h-56 w-full rounded-xl" />
         <div>
           <p className="truncate text-xs font-medium tracking-wide text-muted-foreground uppercase">
             {store} · {category}
@@ -88,7 +88,31 @@ export default function ProductDetailDialog({
             <p className="mb-1 text-xs font-medium text-muted-foreground">
               {t('productDetail.trend')}
             </p>
-            <PriceTrendChart from={hasDrop ? priceFrom! : price} to={price} />
+            <PriceTrendChart
+              from={hasDrop ? priceFrom! : price}
+              to={price}
+              history={history}
+            />
+            {history.length >= 2 && (
+              <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+                <span>
+                  {t('productDetail.lowest', {
+                    price: priceWithCurrency(
+                      Math.min(...history.map((point) => point.price)),
+                      currency,
+                    ),
+                  })}
+                </span>
+                <span>
+                  {t('productDetail.highest', {
+                    price: priceWithCurrency(
+                      Math.max(...history.map((point) => point.price)),
+                      currency,
+                    ),
+                  })}
+                </span>
+              </div>
+            )}
           </div>
         )}
         {isOwner && !bought && (
@@ -97,6 +121,7 @@ export default function ProductDetailDialog({
             productId={id}
             currentPrice={price}
             currency={currency}
+            available={available}
             priceWithCurrency={priceWithCurrency}
           />
         )}

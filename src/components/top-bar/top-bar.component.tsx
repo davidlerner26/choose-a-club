@@ -6,6 +6,7 @@ import type { User } from 'firebase/auth';
 import { IconPlus } from '@tabler/icons-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import LinkField from '@/components/link-field/link-field.component';
+import NotificationBell from '@/components/notification-bell/notification-bell.component';
 import UserMenu from '@/components/user-menu/user-menu.component';
 import { useLocale } from '@/hooks/use-locale';
 import type { Product } from '@/types';
@@ -58,6 +59,7 @@ export default function TopBar({
             <span className="hidden sm:inline">{t('profile.addProduct')}</span>
           </Button>
         )}
+        {user && <NotificationBell uid={user.uid} />}
         {user ? (
           <div className="lg:hidden">
             <UserMenu />

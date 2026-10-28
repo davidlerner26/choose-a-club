@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import ProductImage from '@/components/product-image/product-image.component';
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -85,11 +86,10 @@ export default function AlertsPage() {
 
             return (
               <li key={alert.id} className="flex gap-3 rounded-xl border bg-card p-4">
-                <div
-                  className="size-16 shrink-0 rounded-lg bg-muted"
-                  style={{
-                    background: `url(${product.url}) center center / contain no-repeat`,
-                  }}
+                <ProductImage
+                  url={product.url}
+                  alt={product.name}
+                  className="size-16 shrink-0 rounded-lg"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-foreground">{product.name}</p>
@@ -99,10 +99,26 @@ export default function AlertsPage() {
                     })}
                   </p>
                   <p className="text-sm font-medium text-primary">
-                    {t('alerts.targetLabel', {
-                      price: priceWithCurrency(alert.targetPrice, alert.currency),
-                    })}
+                    {alert.mode === 'lowest'
+                      ? t('alerts.modeLowest')
+                      : alert.mode === 'restock'
+                        ? t('alerts.modeRestock')
+                        : t('alerts.targetLabel', {
+                            price: priceWithCurrency(alert.targetPrice, alert.currency),
+                          })}
+                    {alert.repeat && ` · ${t('alerts.repeat')}`}
                   </p>
+                  {(!alert.mode || alert.mode === 'target') && product.price > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {product.price <= alert.targetPrice
+                        ? t('alerts.reached')
+                        : t('alerts.away', {
+                            percent: Math.ceil(
+                              ((product.price - alert.targetPrice) / product.price) * 100,
+                            ),
+                          })}
+                    </p>
+                  )}
                 </div>
                 <Button
                   variant="ghost"
